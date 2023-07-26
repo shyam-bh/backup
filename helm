@@ -1,0 +1,144 @@
+Helm:
+Charts
+Templates
+Values.yml
+
+Recording:
+https://bakerhughes-my.sharepoint.com/:v:/p/mannepallibalachandra_rao/EUIP-hWSV45Kg_pq30du9V4BvQbbLMsRiAYQlSeYlXPbXw
+
+https://bakerhughes-my.sharepoint.com/:v:/p/mannepallibalachandra_rao/EUIP-hWSV45Kg_pq30du9V4BvQbbLMsRiAYQlSeYlXPbXw
+
+Confluenece for ingress:
+https://bakerhugheswiki.atlassian.net/wiki/spaces/IAM/pages/388881353137/Manage+Kubernetes+Applications+using+HELM
+
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ \ \
+ 
+Helper: define label in yaml
+ 
+
+ 
+Customize the projects:
+ 
+  
+
+Template and dev folder
+\Env:
+Config & secret
+ 
+
+ 
+  
+ 
+     
+
+
+Useful Helm Commands:
+
+ 
+
+Check Version
+
+helm version
+
+ 
+
+Create a new chart with the given name
+
+helm create bh-access-control-config-svc
+
+ 
+
+Lint Chart
+
+helm lint <your_chart_path> -f values-<env>.yaml
+
+ 
+
+Example: helm lint . -f values-dev.yaml
+
+( . indicates command is executed from the root directory of my helm chart)
+
+ 
+
+Chart Template
+
+helm template <your_release_name> <your_chart_path> -f values-<env>.yaml
+
+ 
+
+Example: helm template myapp . -f values-dev.yaml
+
+ 
+
+Install Chart
+
+helm install <your_release_name> <your_chart_path> -f values-<env>.yaml -n <namespace>
+
+ 
+
+Example: helm install myapp . -f values-dev.yaml -n app
+helm installation:
+https://helm.sh/docs/intro/install/
+
+helm official documentation:
+https://helm.sh/docs/
+
+Helm fort Windows:
+https://medium.com/@JockDaRock/take-the-helm-with-kubernetes-on-windows-c2cd4373104b
+
+
+1. helm create bh-access-control-config-svc
+ 
+
+Copying data:
+Folder structure:
+ 
+2.
+a) Update chart.yaml & helprs.tpl(under template folder) with below & create envirment folder with dev, qa subfolders:
+ 
+
+Chart.yml  >>> done
+hempr.tpl(templates)  >>> done
+templates folder>> copy all ymls as it is
+ 
+create environment folder>> dev subfolder
+   environment: all config.ymls & secret.ymls
+environment>>dev (remove deployment & svc)
+ 
+
+Modifying the data:
+i)	Configmaps & secrets
+Environment : making connection b/w files in environment with files inside templates folder
+Environment >>dev>> edit all files and keep only data section:
+Ex:
+ 
+Secret:
+ 
+Templates>>files:
+ 
+Meta data name
+File name inside environment folder should match for templates
+ 
+ 
+ii)	Values-dev.yml vs deployemt & service files inside templates
+
+Values.yml
+Replace Image value from deploymt.yml
+Metadata label
+Replicas (replica count:1)
+
+Template label
+ 
+
+Deployment.yml
+
+Service.yml
+
