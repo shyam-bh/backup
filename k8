@@ -1,0 +1,575 @@
+Port: 80 http
+Port: 443 https
+
+80 & 443 both listerners forward to target group
+
+SG: firewal allows & denies  network tradffic traffic
+A. Jenkins(6443,443)
+B.k8 cluster creation
+C.Elb creation: 6443,443.tcp:6443 ec2 & elb SG same, all selected
+C.Nginx
+
+   1.POD: nodeport: instance port,443
+   2.Ec2 instance: instance port:80,443
+
+Ec2 instance:
+-------------
+master: m4.large: 50
+
+slaves : m4.xlarge: 100
+
+Subnet: pvt sbnt-2A
+
+SG: 7
+------------------------------------------------
+
+6443: instance port https   
+443: lb port  https   
+tcp:6443
+
+
+sample: fast-lca-qa2-elb-372214970.us-west-2.elb.amazonaws.com
+
+fast-lca-qa2-elb  
+
+Jenkins deployment required>>> KUBE_API_EP>>> ALB, $KUBE_API_TOKEN>>>> secret, CERT>>>> deployment cert
+
+=====================================
+       K8 cluster creation
+====================================
+
+note: export KUBECONFIG=/etc/kubernetes/admin.conf
+
+Note:
+checks:
+Details:
+RDC
+Prod
+
+docker registry
+
+
+K8 cluster creation:
+
+Step1:
+
+1.EC2 instance creation for master with m4.xlarge for 50 GB storage
+2.EC2 instance creation for slave with m3.medium for 100 GB storage
+
+Step2:
+
+Run master script on master node with changes >>>> Docker-registry, project name: iquity, env: perf     
+(Master node version check)>>> node kubelet will not come up, untill u join node with master
+
+Run Slave script on slave node with changes >>>> project name: iquity, env: perf     
+(Master node version check)
+
+yum install -y kubelet-1.21.0 kubeadm-1.21.0 kubectl-1.21.0   // 1.22.2
+
+yum install -y kubelet-1.23.5 kubeadm-1.23.5 kubectl-1.23.5  : 89 line
+
+yum install -y kubelet-1.22.2 kubeadm-1.22.2 kubectl-1.22.2
+
+
+Generate join command:
+
+step-3:
+
+kubeadm token create --print-join-command (it will generate join command)
+
+Apply join command on nodes, then kubectl get nodes
+
+Step-4: generate deployment certificate:
+
+
+CMDs for k8 cluster creation:
+yum install kubelet-1.23.5-0 kubeadm-1.23.5-0 kubectl-1.23.5-0 --disableexcludes=kubernetes
+
+==============================================================================
+Remove: if k8 cluster script not working remove it and install manually one by one
+=============================================================================
+yum remove kubeadm kubectl kubelet kubernetes-cni kube*
+yum autoremove
+yum list available | grep kubeadm*
+
+kubeapi-ep & deployment certificate:
+
+
+=========================
+  CALICO INSTALLATION
+https://projectcalico.docs.tigera.io/getting-started/kubernetes/flannel/flannel
+=========================
+
+Multitenancy in iquity project:
+Multiple replicas in appshell...
+
+=======================================
+
+Kube-api-token & Deploy.crt generation:
+kubectl get rolebindings
+kubectl create clusterrolebinding deployer --clusterrole cluster-admin --serviceaccount default:default
+KUBE_DEPLOY_SECRET_NAME=`kubectl get sa default -o jsonpath='{.secrets[0].name}'`
+kubectl get secret $KUBE_DEPLOY_SECRET_NAME -o jsonpath='{.data.token}'|base64 --decode  add as secret in jenkins to cloud ops
+
+
+kubectl get secret $KUBE_DEPLOY_SECRET_NAME -o jsonpath='{.data.ca\.crt}'|base64 --decode > deploy.crt
+
+ls
+
+cat deploy.crt
+
+Set up docker registry credentials on master.
+
+docker login cde-docker-registry.eic.fullstream.ai  ( enter username/password - cde-registry/cde-registry) or cde-reg-credentials
+ofe-registry
+
+kubectl create secret generic vine-dev-cred --from-file=.dockerconfigjson=/root/.docker/config.json --type=kubernetes.io/dockerconfigjson
+
+kubectl create secret docker-registry vine-dev-cred --docker-server=vine-registry-dev.np-00001988.npause1.bakerhughes.com --docker-username=vinedkrusrdev --docker-password=MVqRt4ateq3aCvEg
+
+NOTE:Create .docker/config.json then put credential, run secret it will work
+
+docker login ofe.aif.fullstream.ai  ( enter username/password :  ofe-registry/ofe-registry) or ofe-reg-credentials
+
+kubectl create secret generic ofe-reg-credentials --from-file=.dockerconfigjson=/root/.docker/config.json --type=kubernetes.io/dockerconfigjson
+
+   or
+
+BH cloud:
+https://rdc-registry-dev.np-0000175.npause1.bakerhughes.com/v2/ 
+
+https://ofe.aif.fullstream.ai 
+
+docker login -u rdcdockeruser -p HYSMJAx2M6wM5gVe rdc-registry-qa.np-0000179.npause1.bakerhughes.com
+
+
+docker pull cde-docker-registry.eic.fullstream.ai/cde-app-shell:1079
+
+=========================
+
+kubectl get secret (docker credential>>>>> vi $HOME/.docker/config.json)
+
+kubectl get po -n kube-system
+
+============
+Confluence:
+=============
+
+https://bakerhugheswiki.atlassian.net/wiki/spaces/IEGOQ/pages/17059736375/Kubernetes+Environment+-+High+Level+Architecture
+
+Jenkins:
+
+sh $WORKSPACE/DEV/env-files/set-k8s-context.sh $KUBE_API_EP $KUBE_API_TOKEN $CERT
+
+KUBE_API_EP >>>> ALB 
+
+KUBE_API_TOKEN>>> API tone
+
+CERT>>> certs
+
+	
+
+kubectl get pods -n kube-system
+
+===================================================
+checks: commands
+
+kubectl get secret
+kubectl get po -n kube-system/ default/
+export KUBECONFIG=/etc/kubernetes/admin.conf
+sudo systemctl stop docker && sudo systemctl stop kubelet
+sudo systemctl start docker && sudo systemctl start kubelet
+
+sudo systemctl start kubelet && sudo systemctl enable kubelet
+
+================================================
+
+
+Create Secrets in a Configuration File
+
+
+echo -n '[value1]' | base64
+echo -n '[value2]' | base64
+
+
+bh-auth>> app-shell --->> keyclock ... authenticate>>>  UI>>> all authentication
+
+
+Confluence Links:
+
+Scripts
+https://bakerhugheswiki.atlassian.net/wiki/spaces/IEGOQ/pages/388746576003/How+to+create+Kubernetes+Cluster+using+Shell+Script
+
+
+
+======================================
+docker registry secret:
+kubectl create secret docker-registry regcred \
+  --namespace=jhipster \ # <--
+  --docker-server=docker.pkg.github.com \
+  --docker-username=********* \
+  --docker-password=******* \
+  --docker-email=*****
+
+
+Network commands:
+goto home directory:
+cd ~
+
+=========================
+
+curl localhost:30080
+
+[root@ip-172-22-36-211 eic17_admin_user]# sudo lsof -i :80
+COMMAND   PID USER   FD   TYPE    DEVICE SIZE/OFF NODE NAME
+kubectl 31189 root    3u  IPv6 105786886      0t0  TCP *:http (LISTEN)
+
+
+=====
+sestatus  >>>> selinium
+
+vi /etc/selinux/config>> disable
+kubectl version --short
+kubeadm v
+kubeadm token list
+
+=======================
+jenkins CD
+===============
+
+k8 certs
+rollout status>>> name of deployment (inside deployment)
+
+=======
+solv
+-----
+
+what create >>reason>> which environment
+Ex: create EFS mount point for pv,pvc creation for fastlca Dev
+
+
+kubectl get cert -n default
+
+k8 architechccture:
+below two are imp for client-certificate-data and client-key-data
+1./etc/kubernetes/kubelet.conf
+kubeadm: /etc/kubernetes/ca.key
+
+kubeadm to regenerate 
+kubectl.conf on all nodes, as well as 
+admin.conf, 
+controller-manager.conf, and 
+scheduler.conf on the cluster's master node. 
+You'll need /etc/kubernetes/pki/ca.key on each node in order for your config files to include valid data 
+for client-certificate-data and client-key-data.
+
+==================================
+(one you installed Kubernetes via kubadm on)
+netstat: check (below all listening on listening on the network)
+
+kubernetes master node
+kube-apiserver, // /usr/local/bin/kube-apiserver \\
+kube-scheduler,
+kube-controller
+kubelet
+etcd		
+
+=========
+check application port no
+=========================
+Deploy and start your application in a Kubernetes cluster.
+
+run kubectl exec <pod name here> -- netstat -tulpn | grep "application name" to identify the port number associated with your application.
+
+run kubectl port-forward <pod name here> <port you like>:<random application port> to
+
+=======================================
+setting up cluster using kubeadm
+https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/
+https://www.trendmicro.com/vinfo/hk-en/security/news/virtualization-and-cloud/the-basics-of-keeping-your-kubernetes-cluster-secure-part-1
+https://www.c-sharpcorner.com/article/kubernetes-installation-in-redhat-and-centos/>>>> k8 installation
+======================================
+
+update version:
+cmd: sudo kubeadm upgrade plan
+
+COMPONENT                 CURRENT   TARGET
+kube-apiserver            v1.23.4   v1.23.6
+kube-controller-manager   v1.23.4   v1.23.6: controll plain k8 cluster & pod network on cluster
+kube-scheduler            v1.23.4   v1.23.6
+kube-proxy                v1.23.4   v1.23.6
+CoreDNS                   v1.8.6    v1.8.6
+etcd                      3.5.1-0   3.5.1-0
+
+
+k8 master installation:
+
+
+===============
+Cert >>> kubeadm upgrade plan and kubeadm upgrade apply
+==============
+
+k8 Certs path
+1.apiserver.crt
+2.apiserver-etcd-client.crt
+3.apiserver-kubelet-client.crt
+4.front-proxy-client.crt
+
+etcd
+5.healthcheck-client.crt 
+kubectl cluster-info
+kubectl get componentstatus
+
+kubectl get nodes -o jsonpath (awk.jq)
+kubectl cluster-info dump
+
+the readinessProbe and the livenessProbe (k8 health check)
+
+
+==========configmap========
+
+reload:
+
+kind: Deployment
+metadata:
+  annotations:
+    configmap.reloader.stakater.com/reload: "foo-configmap"
+  name: foo
+
+
+Name spacess (NS):
+Default
+kube-system: obj by k8
+kube-public : 
+kube-node-lease
+
+================
+K8 learning docs
+===============
+https://vocon-it.com/2019/10/30/cka-labs-16-kubernetes-persistent-volumes/
+
+
+==========
+Premathes & grafana
+================
+https://www.youtube.com/watch?v=HgjTUiU0Ihk&list=PLdsu0umqbb8M9EyWJpPSA-NDhRcigO1c6&index=10
+
+notes:
+ufw status>> firewalld inactive
+cluster reset:
+https://bakerhugheswiki.atlassian.net/wiki/spaces/BHD/pages/388813455788/How+to+reset+a+Kubernetes+Cluster
+
+
+Note: Cluster reset both master and slave
+
+Update:
+Official Docker Deprecation
+
+deprecated dockershim”, that is, moving dockershim out of kubelet, is not a software product that “deprecates Docker”.
+Therefore, “deprecating Docker” will not have much impact on K8s and Docker, because both of them have already changed the lower layers to open source containerd, and the original Docker images and containers will still run normally. The only change is that K8s bypasses Docker and directly calls containerd inside Docker.
+
+containerd replacing the dockerd 
+
+docker ps will not work: usr crictl
+
+However, there will be some impacts. If K8s uses containerd directly to manipulate containers, then it is a separate working environment from Docker, and neither can access the containers and images managed by the other. In other words, using the command docker ps will not see the containers running in K8s
+
+
+Finally, the 1.24 version released in May this year removed the dockershim code from the kubelet
+
+
+
+Commands:
+https://kubernetes.io/docs/tasks/debug/debug-cluster/crictl/#mapping-from-docker-cli-to-crictl
+Container runtime interface
+CRI: 
+
+
+=================
+K8
+==========
+
+Blog:
+https://kubernetes.io/blog/
+
+
+=============================================
+Jenkins pipeline plugin   && Jenkins k8 plug in
+==============================================
+https://www.jenkins.io/doc/book/pipeline/
+
+https://plugins.jenkins.io/phabricator-k8s/#documentation
+
+
+k8: Videos:
+https://www.youtube.com/watch?v=HJ6F05Pm5mQ&list=PLpbcUe4chE79sB7Jg7B4z3HytqUUEwcNE
+
+===============
+For instance:
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "250m"
+    limits:
+      memory: "512Mi"
+      cpu: "500m"
+==================
+
+
+=============================
+Deploying POD on specific node
+=============================
+before Deleting node , drain the node
+
+kubectl drain <node_name> --delete-local-data --force --ignore-daemonsets
+
+2.testkey: Give worker node label
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: first-deployment
+  labels:
+    app: first
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: first-deployment-pod
+      label:
+        app: first
+    spec:
+      containers:
+      - name: test
+        image: test/test
+      nodeSelector:
+        testkey: testvalue
+        testkey: testvalue == here give node lael=value
+
+
+
+Rabbitmq: k8 helm chart:
+
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm install my-release bitnami/rabbitmq
+RabbitMQ packaged by Bitnami Chart Github repository
+
+Azure:
+helm repo add azure-marketplace https://marketplace.azurecr.io/helm/v1/repo
+helm install my-release azure-marketplace/rabbitmq
+
+===============================
+namespace stuck in termination
+==============================
+
+kubectl get namespace <YOUR_NAMESPACE> -o json > <YOUR_NAMESPACE>.json
+kubectl replace --raw "/api/v1/namespaces/<YOUR_NAMESPACE>/finalize" -f ./<YOUR_NAMESPACE>.json
+NS=`kubectl get ns |grep Terminating | awk 'NR==1 {print $1}'` && kubectl get namespace "$NS" -o json   | tr -d "\n" | sed "s/\"finalizers\": \[[^]]\+\]/\"finalizers\": []/"   | kubectl replace --raw /api/v1/namespaces/$NS/finalize -f -
+
+
+node port range: 30000 to 32768
+
+01/30/22: kubeadm package not update in k8-cluster
+
+exclude=kube* docker* in /etc/yum.conf
+
+===================
+K8 certs expiry and renew
+======================
+find /etc/kubernetes/pki/ -type f -name "*.crt" -print|egrep -v 'ca.crt$'|xargs -L 1 -t  -i bash -c 'openssl x509  -noout -text -in {}|grep After'
+
+kubeadm certs renew all
+
+
+systemctl restart kubelet
+
+
+cp /root/.kube/config /root/.kube/.old-$(date --iso)-config
+
+
+cp /etc/kubernetes/admin.conf /root/.kube/config
+
+============
+  486  rm -rf /etc/kubernetes/  .kube/  /var/lib/kubelet/  /var/lib/cni /var/lib/etcd/  /etc/cni
+  487  rm -rf /etc/yum.repos.d/kubernetes.repo /etc/yum.repos.d/docker-ce.repo
+  488  yum remove kubeadm kubectl kubelet kubernetes-cni kube*
+
+============
+AWS CLI
+==============
+aws ec2 describe-instances --filters Name=instance-state-name,Values=running --query 'Reservations[].Instances[].[PublicIpAddress, Tags[?Key==Name].Value | [0] ]' --output text
+
+/usr/local/bin/aws ec2 describe-instances --filters Name=instance-state-name,Values=running --query 'Reservations[].Instances[].[PublicIpAddress, Tags[?Key==Name].Value | [0] ]' --output text
+
+
+
+==================
+Helm installation:
+============
+
+
+==================
+Bastionhost Installation:
+=====================
+
+bastion-cloud.np-0000002.npause1.bakerhughes.com
+
+Ping bastionnlb-047511269496-cccd8952c27d5262.elb.us-east-1.amazonaws.com
+
+bastionnlb-047511269496-cccd8952c27d5262.elb-east-1.amazonaws.com
+ping bastion-cloud.np-0000002.npause1.bakerhughes.com
+
+bhi-master\pendshy
+
+bhi-master\431
+
+
+
+
+========================
+ECR
+=============
+#docker login -u AWS -p $passwd https://280307018626.dkr.ecr.us-east-1.amazonaws.com
+docker login -u AWS -p $(aws ecr get-login-password --region us-east-1) https://280307018626.dkr.ecr.us-east-1.amazonaws.com
+docker login -u AWS -p $(aws ecr get-login-password --region us-east-1) https://280307018626.dkr.ecr.us-east-1.amazonaws.com
+
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 681300882714.dkr.ecr.us-east-1.amazonaws.com
+
+=============
+Jenkins
+===========
+Sparq npm project====
+https://jenkinsops.prd-0000108.pause1.bakerhughes.com/job/MTC_Jobs/job/SPARQ/job/App_Shell/job/CI/job/cde-app-shell-test/41/replay/
+
+
+
+==============================
+
+Blackduck
+==============
+Binary:
+https://updates.jenkins-ci.org/download/plugins/synopsys-coverity/
+
+Jenkins integration:
+https://synopsys.atlassian.net/wiki/spaces/INTDOCS/pages/623018/Synopsys+Coverity+for+Jenkins
+
+Project Name
+Version Name
+Project User Groups
+Project Group Name
+
+Email: OSSAdmin@bakerhughes.com
+
+
+#!/bin/sh
+ kubectl get pods --no-headers=true -o custom-columns=NAME_OF_MY_POD:.metadata.name | grep dep-keycloak-svc > pod.txt
+
+file="$WORKSPACE/pod.txt"
+
+cat pod.txt | \
+while read CMD; do
+    echo $CMD
+kubectl cp Baker\ Hughes default/$CMD:/opt/jboss/keycloak/themes
+done
+
