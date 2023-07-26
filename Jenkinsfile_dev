@@ -1,0 +1,82 @@
+pipeline {
+    agent {
+    //label '10.229.6.80'
+    label 'e2c'
+    } 
+    options {
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '30'))
+  } 
+
+    parameters {
+        string(name: 'IMAGE_TAG', defaultValue: '', description: 'provide the image tag to be deployed')
+        string(name: 'DIR_NAME', defaultValue: 'bhdev', description: 'provide the target directory path where need to update image version dev or qa etc.')
+        //string(name: 'IMAGE_NAME', defaultValue: '', description: 'provide the image name to be deployed')
+       choice(name: 'IMAGE_NAME', choices: ['bh-security-service','notification-services','bh-user-mgmt','cde-app-shell','dpage/pgadmin4','jboss/keycloak','nginx','rdc-idea-portal-app','rdc-ideaportal-service','rdc-mindmap-app','rdc-mindmap-service','rdc-projectoverview-app','rdc-projectoverview-service','rdc-rdc-collab-service','rdc-resources-app','rdc-resource-service','rdc-sketch-app','rdc-survey-app','rdc-survey-publish','rdc-survey-service','rdc-usability-app','rdc-usability-service','rdc-usermanagement-service','rdc-userpersona-app','rdc-userpersona-service','rdc-whiteboard','rdc-whiteboard-service','rdc-workspace-app','rdc-workspace-service','rdc-workspace-service','app-builder','app-store','ui-query-executor','widget-store','app-builder','app-store','ui-query-executor','widget-store',] , description: 'provide the image name to be deployed')
+         string(name: 'DEVREGISTRY', defaultValue: 'rdc-registry-dev.np-0000175.npause1.bakerhughes.com', description: 'provide the image registry name')
+    }
+    
+    // define the credentials to be used according to the project requirements in environment.
+    environment {
+        cdecred = credentials('bh-ent-tech-ghcr-token')
+        gitcred = credentials('NEW_BH_GIT')
+        devcred = credentials('rdc-dev-registry')
+        //qacred = credentials('Iquity-qa-registry')
+        //devregistry = 'iquity-registry-dev.np-0000187.npause1.bakerhughes.com'
+
+    }
+    stages{
+        stage('Check prerequisites'){
+            steps{
+                script{
+                    cleanWs()
+                    if ("${params.IMAGE_NAME}" == ''){
+                    currentBuild.result = 'ABORTED'
+                    error('Image name not provided !!!')
+                    }
+                }
+            }
+        }
+         /* stage('Docker Image pull/push')
+        {
+            steps{
+              sh '''
+              echo $devregistry
+              docker login --username ${devcred_USR} ${devregistry} --password ${devcred_PSW}
+                docker pull ${devregistry}/${IMAGE_NAME}:${IMAGE_TAG}
+                docker logout
+
+                docker tag $devregistry/$IMAGE_NAME:$IMAGE_TAG ${QAREGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                
+                docker login --username ${qacred_USR} ${QAREGISTRY} --password ${qacred_PSW}
+                docker push ${QAREGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                docker logout
+                '''
+            }
+        }   */
+        stage("Update manifest files")
+        {
+            steps{
+                git branch: "argocd" , credentialsId: 'NEW_BH_GIT', url: "https://github.com/bh-ent-tech/rdc-argocd.git"
+                echo "Image Version $IMAGE_TAG of Image $IMAGE_NAME will be updated in deployment.yaml of DIR $DIR_NAME"
+                sh '''
+        IMAGE_BUILD=${DEVREGISTRY}/${IMAGE_NAME}
+                cd $DIR_NAME/$IMAGE_NAME
+                cat deployment.yaml | grep -i "image"
+                sed -i "s|image: .*$|image: ${IMAGE_BUILD}:${IMAGE_TAG}|" deployment.yaml  
+                 
+                cat deployment.yaml | grep -i "image" 
+                git config --local user.name "Jenkins"
+                git config --local credential.helper "!f() { echo username=\$gitcred_USR; echo password="\$gitcred_PSW"; }; f"
+                git add deployment.yaml
+                git commit -m "Updated deployment.yaml with $IMAGE_NAME$IMAGE_TAG" || true
+                git push origin argocd
+                '''
+            }
+        } }
+        post { 
+        always {
+          cleanWs()
+          }        
+    }
+}  

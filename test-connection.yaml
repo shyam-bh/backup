@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "bh-access-control-config-svc.fullname" . }}-test-connection"
+  labels:
+    {{- include "bh-access-control-config-svc.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "bh-access-control-config-svc.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never

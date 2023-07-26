@@ -1,0 +1,151 @@
+---
+apiVersion: v1
+data:
+  app-shell.conf: |
+      [
+        {
+          "grantType": "password",
+          "clientId": "appshell",
+          "uaaURL": "https://rdc-dev.np-0000175.npause1.bakerhughes.com",
+          "redirectUrl": "https://rdc-dev.np-0000175.npause1.bakerhughes.com/authorization-code/callback",
+          "uaaClientSecret": "8979c270-665c-4813-abfc-4f454b1492ba",
+          "route": "",
+          "tenant": "RDC",
+          "refreshGrantType": "refresh_token",
+          "tokenURL" : "/bh-auth",
+          "appURL":"",
+          "MultiTenant":false,
+          "fileUploadLimit":"11mb",
+         "microappServices":[
+         {
+          "id":"rdc",
+          "name": "Research. Design. Collaborate",
+          "link": "/app-rdc/",
+          "icon": "games",
+          "host": "http://svc-dep-rdc-workspace:80",
+          "path":"/app-rdc",
+          "template":"/index.html",
+          "navService":"/nav",
+          "default": true,
+           "visibility":true
+        },
+         {
+          "id":"usability",
+          "name": "Usability Test",
+          "link": "/app-usability/",
+          "icon": "games",
+          "host": "http://svc-dep-rdc-usability.default:80",
+          "path":"/app-usability",
+          "template":"/index.html",
+          "navService":"/nav",
+          "default": false,
+           "visibility":true
+        },
+         {
+          "id":"mindmap",
+          "name": "Mindmap",
+          "link": "/app-mindmap/",
+          "icon": "games",
+          "host": "http://svc-dep-rdc-mindmap.default:80",
+          "path":"/app-mindmap",
+          "template":"/index.html",
+          "navService":"/nav",
+          "default": false,
+          "visibility":true
+        },
+        {
+          "id":"whiteboard",
+          "name": "Whiteboard",
+          "link": "/app-whiteboard/",
+          "icon": "games",
+          "host": "http://svc-dep-rdc-whiteboard.default:80",
+          "path":"/app-whiteboard",
+          "template":"/index.html",
+          "navService":"/nav",
+          "default": false,
+          "visibility":true
+        },
+        {
+          "id":"userpersona",
+          "name": "Userpersona",
+          "link": "/app-userpersona/",
+          "icon": "games",
+          "host": "http://svc-dep-rdc-userpersona.default:80",
+          "path":"/app-userpersona",
+          "template":"/index.html",
+          "navService":"/nav",
+          "default": false,
+          "visibility":true
+        },
+         {
+          "id":"resources",
+          "name": "Resources",
+          "link": "/app-resources/",
+          "icon": "games",
+          "host": "http://svc-dep-rdc-resources.default:80",
+          "path":"/app-resources",
+          "template":"/index.html",
+          "navService":"/nav",
+          "default": false,
+          "visibility":true
+        },
+        {
+          "id": "projectoverview",
+          "name": "Project Overview",
+          "link": "/app-projectoverview/",
+          "icon": "games",
+          "host": "http://svc-dep-rdc-projectoverview.default:80",
+          "path": "/app-projectoverview",
+          "template": "/index.html",
+          "navService": "/nav",
+          "default": false,
+          "visibility": true
+        },
+        {
+          "id": "survey",
+          "name": "Survey",
+          "link": "/app-survey/",
+          "icon": "games",
+          "host": "http://svc-dep-rdc-survey.default:80",
+          "path": "/app-survey",
+          "template": "/index.html",
+          "navService": "/nav",
+          "default": false,
+          "visibility": true
+        },
+        {
+          "id": "sketch",
+          "name": "Sketch",
+          "link": "/app-sketch/",
+          "icon": "games",
+          "host": "http://svc-dep-rdc-sketch.default:80",
+          "path": "/app-sketch",
+          "template": "/index.html",
+          "navService": "/nav",
+          "default": false,
+          "visibility": true
+        },
+        {
+          "id": "appbuilder",
+          "name": "App Builder",
+          "link": "/app-builder/",
+          "icon": "warningrounded",
+          "host": "http://svc-app-builder:80",
+          "path": "/app-builder",
+          "template": "/micro-app.html",
+          "navService": "/nav",
+          "default": true,
+          "visibility": true
+            }
+            ],
+          "clientSecret": "",
+          "tokenURL" : "/bh-auth",
+          "logoutUrl": "/bh-auth/oauth2/v2/logout",
+          "productName": "RDC",
+          "passwordPolicyregex":"^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*.{}?\"/,><\\':;|_~`^]).{8,100}$",
+          "passwordPolicyText":["Password should contain 0-9 characters","Password should not contain username","Use numeric and special symbols (!@#$%^&*)","Password should be minimum 8 characters long","Password should be maximum 100 characters long"]
+        }
+      ]
+kind: ConfigMap
+metadata:
+  name: app-shell-config

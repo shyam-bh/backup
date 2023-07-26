@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dep-bhsecurity-service
+  labels:
+    app: dep-bhsecurity-service
+spec:
+  replicas: 1
+  selector:
+   matchLabels:
+    app: dep-bhsecurity-service
+  template:
+    metadata:
+      labels:
+        app: dep-bhsecurity-service
+    spec:
+      containers:
+        - name: dep-bhsecurity-service
+          image: rdc-registry-dev.np-0000175.npause1.bakerhughes.com/bh-security-service:497
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+          - name: oauth2.provider	       
+            value: "KEYCLOAK"		           
+          - name: idp.multitenant
+            value: "true"
+          - name: oauth2.provider.region	          
+            value: "us-east-1"	         
+          - name: tenant.idp	      
+            value: "default"	           
+          - name: oauth2.issuer.url	
+            value: "http://100.64.51.52:32000/auth/realms/"	
+          - name: oauth2.issuer.public.url
+            value: "https://keycloak-rdc-dev.np-0000175.npause1.bakerhughes.com/auth/realms/"
+          - name: tenant.service.url	
+            value: "NA"	
+          - name: oauth2.token.url	
+            value: "/protocol/openid-connect/token"	
+          - name: oauth2.introspect.token.url	
+            value: "/protocol/openid-connect/token/introspect"	
+          - name: oauth2.logout.url	
+            value: "/protocol/openid-connect/logout"	
+          - name: tenant.supported.grant	
+            value: "password"	
+          - name: oauth2.authorize.url	
+            value: "/protocol/openid-connect/auth?response_type=code&client_id="	
+          - name: oauth2.auth.url	
+            value: "/protocol/openid-connect/auth"	
+          - name: custom.pkce	
+            value: "disabled"	
+          - name: padding.required	
+            value: "false"	
+          - name: redis.credentials.host	
+            value: "NA"	
+          - name: redis.credentials.port	
+            value: "0000"
+          - name: health.port
+            value: "5678"
+          - name: app.name
+            value: "security-service"
+          - name: app.address
+            value: "ss-adress"
+          - name: app.instance.id
+            value: "1111"
+          - name: swagger.domain.path
+            value: "http://svc-bhsecurityservice/bh-auth"   
+      imagePullSecrets:
+        - name: rdc-dev-cred
