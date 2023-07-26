@@ -1,0 +1,278 @@
+SSl certs:
+1.git config --global http.sslVerify false
+2. ssh-keygen -t rsa -C "youremail@somewhere.com"
+
+Setup brach for git pull
+git branch --set-upstream-to=origin/infra-setup
+Git config –global push.default current
+Cloning:
+Git checkout -b solaries
+Git add –all (pushing all changes to git)
+Git push origin solaris
+git remote -v
+
+git –set-upstream-to origin/solaries or git push –set-upsteam origin <br>
+then   do git push/ git fetch or git merge or git rebase
+Ex: git push -u origin solaries
+-	U>>> if you add flag – git will set origin solaries as the upstream for ur current branch
+Then push succeed,
+Or
+Git branch –set-upsream-to
+git remote set-url origin https://github.com/ghost/ReactiveCocoa.git
+
+git remote set-url origin new_url
+
+git branch -a
+
+git checkout new-main
+
+git clone -b <branch>(<-- all>) <repository>
+
+ 
+ 
+ 
+ 09/28/2021:
+
+ 
+ 
+
+Deployment command:
+kubectl apply -f worker-deployment.yaml --insecure-skip-tls-verify
+kubectl apply -f worker-deployment.yaml --insecure-skip-tls-verify --validate=false
+
+09/29/21:
+kubectl describe pods nginx-6f8bf9d468-vjz7g
+kubectl delete pods nginx-6f8bf9d468-2f6hx
+kubectl edit cm nginx-config
+kubectl describe cm nginx-config
+kubectl get svc
+kubectl logs --tail=20 -f nginx-6f8bf9d468-2f6hx
+kubectl edit cm nginx-config
+kubectl logs --since=12h nginx-5f6485fd9-pbp9m | grep error
+
+10/04/21:
+ 
+ 
+ 
+
+Till now I have done now,
+POC:
+This is what have done……
+
+Basic setup,
+Updation: Basic commit,
+Config files, commit history,
+KT 
+Pod
+Presto
+Services
+I am looking into other projects..
+Delete and create 
+
+This is new badgateway error , please wait for some time or raise a new ticket will look into it
+
+
+192.168.91.1
+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
+
+
+Gite repo commit commands: (git reflog   >>> all recent commits), git checkout <your commit-SHA>, git cherry-pick <your commit-SHA>
+Git init
+Git add branch_name
+Git status
+Git add -A / git add */ git add . /#git add deployment.yaml
+Git commit -m  “update” // #git commit -m "Updated deployment.yaml with build number with $IMAGE_TAG in versions.text " || true
+(git push origin $branch)
+Git log -1
+Git remote add origine .gt(url)
+Git push -u origin master (git push origin -u “branch”) or
+Git push -f origin master
+Git remote -v
+git remote add upstream
+git fetch upstream
+git checkout upstream/BHQAEnvSetup
+note: keep on staging area >> git merge --no-off dev
+All branches:
+Git branch –all / git fetch –all, git branch -v
+   Remote/origin/head
+   Remote/origin/dev
+   Remote/origin/master
+Into a branch:
+Git checkout Remote/origin/master
+Git brach >>> (master branch)
+
+Merge (Dev with master)
+Git fetch origin master
+Git merge master
+Git push origin dev:master
+i)
+Git status (on dev branch)
+Git add *
+Git commit -m “msg”
+Git push origin master dev
+ii)  Switch to master branch(push the code from dev to master)
+git branch -f master HEAD
+git push -f origin master
+                           or
+1.	//pull the latest changes of current dev branch if any
+Git pull (current dev branch)
+2.	// switch to master branch
+   Git checkout master
+3.	// pull all changes if any
+          Git pull
+4.	// now merge dev into master
+       Git merge dev
+5.	// push the master branch
+      Git push origin master
+
+
+02/25/22:  Git VB commands:
+
+
+
+ 
+
+Common services:SS,usrmgmtsvc,keycloack,app-shell
+
+Github repos:
+FNPT:
+https://github.com/bh-ent-tech/valves-bh-cloud-cicd-config.git  >>> Cacert
+
+
+SPS:
+https://github.com/bh-ent-tech/sps-cloud-deployment.git
+
+
+Sparq:
+https://github.com/bh-ent-tech/sparq-security-argocd
+https://github.com/bh-ent-tech/sparq-fs-argocd >>> asset,alert
+https://github.com/bh-ent-tech/sparq-cm-argocd >>  aler2
+https://github.com/bh-ent-tech/sparq-ai-argocd >>> Jupiter notebook
+https://github.com/bh-ent-tech/sparq-appbuilder-ai-argocd  >> wigitstore,app-store,query
+
+https://github.com/bh-ent-tech/sparq-appshell-argocd >>>
+
+
+
+git config –global user.name “shyam github”
+git config –global user. “shyam github”
+git config –list
+
+
+
+ssh keygen:
+ssh-keygen -t rsa -C  
+
+
+or
+
+git init
+git add .
+git commit -m “msg”
+git status
+git log
+git add remote origin server_repo_url
+git push -u orgin master
+git clone server_repo_url
+git log  –pretty=oneline 
+
+Branch commands:
+Git branch new_branch
+Git checkout new_branch
+Git push -u origin new_branch 
+Git branch -v
+Git merge new_branch
+Git branch -D new_branch
+Git push origin -delete new_branch
+
+RPM packages:
+Python latest package:
+https://www.python.org/ftp/python/
+
+Git stash <file name>
+Git unstash <file name>
+GIT.IGNORE:
+Cat >>.gitignore  
+touch .gitignore
+vi .gitignore
+Folder want to add to git repo
+Add bh-dev/app-builder-sample-app4/
+If git .ignore not working use below cmd to remov folder from gitbash cache
+git rm --cached -r app-builder-sample-app4
+
+
+    Git_cmd
+Git is the most popular version control tool for a long time.
+There is a misconception about Git as there are misconceptions about any other popular tool. People Think Git and Github are completely similar entities. But Git is a distributed version control system to track code changes during the software development cycle while GitHub is the central repository to keep that tool. There are many git repositories other than Github such as Atlassian, Gitlab, Gerrit, etc. All these central repositories are based on one and only version control tool Git. Git is already widely used as a version control tool in both organizations and academics.
+In this article we will discuss the most useful git commands in brief, there are other articles where you can learn about those commands in-depth.
+HISTORY OF GIT 	
+In very short, Git development started in 2005 when BitKeeper, a proprietary version control system revoked its usage for Linux Kernel Development. Linux Torvalds, the pioneer of the Linux operating system wanted an open-source version control system capable to hold Linux Kernel Development. So, his team created Git in 2005.
+
+
+
+COMMANDS:
+1. git config
+2. git init
+git init makes your working directory into a local git repository. After the execution of git init a hidden folder “.git” gets created in the directory which enables the use of git command in that folder and all its subfolders.
+3. git add filename / .
+git add “filename” will add the file in the tracked files of git. “git add .” will add all the untracked files in the git tracked files list. git add stages the file for commit. If git add is not used before a commit, a commit will complain about no changes.
+4. git commit
+5. git log
+git log lists out all the commit logs of the current git repository since inception.
+6. git reflog
+git reflog or “reference log” is to take care of the reference git commit history from the ‘tip’. Tip references the point when this project is cloned.
+7. git diff
+8. git status
+git status shows the current status of the git repository. It mainly shows the list of all the modified files and untracked files. It also shows the file where there is a merge conflict. It also shows your current working branch.
+9. “.gitignore”
+.gitignore is not a command, but we can add .gitignore file in our git repository which will exclude specific files from being a part of the git repository. These files will only be present in the folder but will be excluded in the git repository. For example, to exclude log files from the git repository, the content of .gitignore file will be “*.log”.
+10. git revert commit_id/ tag_id
+If we want to revert one commit and all its changes we apply git revert commit_id and that commit changes will be reverted in the local git repository.
+11. git branch
+git branch command lists out all the branches present in the git repository. git repository is initialized as master branch. But, we may need many branches to work in the development as different teams may make changes to the same code for different purposes. Branching virtually makes the development procedure clean by providing team-specific development codes. Any team can checkout their particular branch and make changes on top of it and when they are done with their testing they can merge it with the master branch.
+ 
+12. git checkout
+13. git reset
+14. git rebase
+git rebase is the process of combining a sequence of commits to a new base commit and this command is very useful in merging one branch with another keeping all the commits in the history.
+Let us say, we want to merge branch master on top of our branch test.
+git checkout master
+git checkout test
+git rebase master
+15. git merge
+git merge is also used to merge any branch with another merge. Let us say we want to merge branch test1 with test2.
+Merge will not create all the commits as rebase, it will only fast forward all the changes and replace the HEAD with the fast-forwarded changes.
+git checkout test2
+git merge test1
+16. git remote add origin
+17. git pull
+18. git push
+19. git cherry-pick commit-hash
+If we want to pick a particular commit from one branch and apply that commit to another branch, we can use this git cherry-pick command.
+git checkout test
+git cherry-pick commit-hash
+20. git bisect
+git bisect is a very important feature using that we can find out which commit is breaking a feature.
+For, git bisect to work we will need a commit where the feature was working fine. We will mark this commit as good.
+And current HEAD or any other commit we can set as bad. It will check every commit from good till bad and that will help us to find which commit is creating the bug.
+git bisect start
+git bisect bad
+git bisect good good_commit_id
+Now, this will set the HEAD to the next commit of the good_commit_id.
+If the feature is working fine at this stage, type
+git bisect good
+else type
+git bisect bad
+In this way, review each and every commit till the last commit which is marked as bad.
+This is a very useful feature for debugging.
+21. git stash
+22. git tag
+23. git show commit_id
+git show commit_id shows the changes for that commit along with the commit message of that particular commit_id.
+u -sh   >> total memory of git
+Ls -la
+Git clone -–single-branch -b master url
+time  git clone -–single-branch -b master –depth 1 url folder
+
+Docs#
+https://git-scm.com/doc
