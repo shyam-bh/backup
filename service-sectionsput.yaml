@@ -1,0 +1,124 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: A codebuild that zips the Go lambda code and uploads to S3.
+Parameters:
+  AppNamesectionsput:
+    Description: Name to give the CodeBuild Project.
+    Type: String
+  RepositoryUrl:
+    Description: 'HTTPS Clone URL of the repository in GitHub. Example: ''https://github.com/<ORG>/repo.git'''
+    Type: String
+  SourceBranch:
+    Description: 'Git repository branch used to pull the code from'
+    Type: String
+  SourceFolder:
+    Type: String
+  CodeBuildSGs:
+    Description:  Name of the SG to be used for the codebuild project
+    Type: String
+  KMSKey:
+    Type: String
+  Env:
+    Type: String
+  LambdaFolder:
+    Type: String
+  LambdaZipName:
+    Type: String
+  PipelineArtifactsBucketName:
+    Type: String
+Resources:
+  VPCLookup:
+    Type: Custom::VPCLookup
+    Properties:
+      ServiceToken: !Join
+          - ':'
+          - - 'arn:aws:lambda'
+            - !Ref AWS::Region
+            - !Ref AWS::AccountId
+            - 'BHCHelperLambdaUtilities'
+      method: vpc_lookup
+
+  ZipLambdaSectionsPut:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+      Name: !Sub Codebuild-${AppNamesectionsput}-zip-upload
+      Description: Zip Go lambda code and upload to S3
+      ServiceRole: !Sub arn:aws:iam::${AWS::AccountId}:role/CICD-Deployment-Role
+      # EncryptionKey: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/${KMSKey}
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: 'aws/codebuild/standard:6.0'
+        EnvironmentVariables:
+          - Value: !Ref SourceFolder
+            Name: SourceFolder
+          - Value: !Ref PipelineArtifactsBucketName
+            Name: PipelineArtifactsBucketName
+          - Value: !Ref LambdaFolder
+            Name: LambdaFolder
+          - Value: !Ref LambdaZipName
+            Name: LambdaZipName
+      VpcConfig:
+        SecurityGroupIds: !Split [",", !Ref CodeBuildSGs]
+        Subnets:
+          - !Select [ "0", !GetAtt VPCLookup.VPCSubnets]
+          - !Select [ "3", !GetAtt VPCLookup.VPCSubnets]
+        VpcId: !GetAtt VPCLookup.VPCId
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: |
+          version: 0.2
+          phases:
+            build:
+              commands:
+                - cd $SourceFolder
+                - go get github.com/aws/aws-lambda-go/lambda
+                - go build
+            post_build:
+              commands:
+                - zip $LambdaZipName service
+                - zip -sf $LambdaZipName
+                - aws s3 cp $LambdaZipName s3://$PipelineArtifactsBucketName/$LambdaFolder/$LambdaZipName
+                - echo "zip copied to S3"
+      TimeoutInMinutes: 10
+
+  # CreateWebhook:
+  #   Type: 'AWS::CodeBuild::Project' 
+  #   Properties:
+  #     Name: !Sub CreateWebhook-${AppNamesectionsput}
+  #     Description: Webhook to trigger zipping of lambda code
+  #     ServiceRole: !Sub arn:aws:iam::${AWS::AccountId}:role/CICD-Deployment-Role
+  #     # EncryptionKey: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/${KMSKey}
+  #     Artifacts:
+  #       Type: NO_ARTIFACTS
+  #     Environment:
+  #       Type: LINUX_CONTAINER
+  #       ComputeType: BUILD_GENERAL1_SMALL
+  #       Image: aws/codebuild/standard:6.0
+  #       EnvironmentVariables:
+  #         - Value: !Ref ZipLambdaSectionsPut
+  #           Name: ProjectName
+  #         - Value: !Ref SourceFolder
+  #           Name: SourceFolder
+  #         - Value: !Ref SourceBranch
+  #           Name: SourceBranch
+  #     Source:
+  #       Type: NO_SOURCE
+  #       BuildSpec: |
+  #         version: 0.2
+  #         env:
+  #           shell: bash
+  #         phases:
+  #             install:
+  #                 commands:
+  #                   - aws --version
+  #             build:
+  #                 commands:
+  #                   - >
+  #                     aws codebuild create-webhook --project-name $ProjectName --filter-groups "[[{\"type\":\"EVENT\",\"pattern\":\"PUSH\"},{\"type\":\"HEAD_REF\",\"pattern\":\"^refs/heads/$SourceBranch\",\"excludeMatchedPattern\":false},{\"type\":\"FILE_PATH\",\"pattern\":\"^$SourceFolder/.*\",\"excludeMatchedPattern\":false}]]" \
+  #     TimeoutInMinutes: 10
+Outputs:
+  CodeBuildProject:
+    Description: CodeBuild Project triggered by GitHub
+    Value: !Ref ZipLambdaSectionsPut

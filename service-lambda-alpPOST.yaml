@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy a lambda function stored as archive zip in a bucket
+Parameters:
+  FunctionName:
+    Type: String
+  S3LambdaArchiveBucket:
+    Type: String
+  S3LambdaArchiveName:
+    Type: String
+  LambdaHandler:
+    Type: String
+  EnvVarJson:
+    Type: String
+  Architectures:
+    Type: String
+  Runtime:
+    Type: String
+  Timeout:
+    Type: String
+  SecretManagerAccessPolicy:
+    Type: String
+  S3AccessPolicy:
+    Type: String
+  UseVPC:
+    Type: String
+  VPCSecurityGroupIDs:
+    Type: String
+  CustomPolicy:
+    Type: String
+  UseALB:
+    Type: String
+  SubnetId:
+    Type: String
+  MemorySize:
+    Type: String
+  SQSarn:
+    Type: String
+Resources:
+  CreateLambdaAllpipelinesPost:
+    Type: "AWS::ServiceCatalog::CloudFormationProvisionedProduct"
+    Properties:
+     ProductName: "Lambda-Deployment"
+     ProvisioningArtifactName: "{{resolve:ssm:/ServiceCatalog/Lambda-Deployment/LatestVersion:1}}"
+     ProvisioningParameters:
+      - Key: "FunctionName"
+        Value: !Ref FunctionName
+      - Key: "S3LambdaArchiveBucket"
+        Value: !Ref S3LambdaArchiveBucket
+      - Key: "S3LambdaArchiveName"
+        Value: !Ref S3LambdaArchiveName
+      - Key: "LambdaHandler"
+        Value: !Ref LambdaHandler
+      - Key: "EnvVarJson"
+        Value: !Ref EnvVarJson
+      - Key: "Architectures"
+        Value: !Ref Architectures
+      - Key: "Runtime"
+        Value: !Ref Runtime
+      - Key: "Timeout"
+        Value: !Ref Timeout
+      - Key: "SecretManagerAccessPolicy"
+        Value: !Ref SecretManagerAccessPolicy
+      - Key: "S3AccessPolicy"
+        Value: !Ref S3AccessPolicy
+      - Key: "UseVPC"
+        Value: !Ref UseVPC
+      - Key: "VPCSecurityGroupIDs"
+        Value: !Ref VPCSecurityGroupIDs
+      - Key: "CustomPolicy"
+        Value: !Ref CustomPolicy
+      - Key: "UseALB"
+        Value: !Ref UseALB
+      - Key: "SubnetId"
+        Value: !Ref SubnetId
+      - Key: "MemorySize"
+        Value: !Ref MemorySize
+      - Key: "SQSarn"
+        Value: !Ref SQSarn
+
+Outputs:
+    LambdaFunction:
+        Description: "Bucket name"
+        Value: !GetAtt  CreateLambdaAllpipelinesPost.Outputs.LambdaArn

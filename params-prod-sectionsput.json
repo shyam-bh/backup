@@ -1,0 +1,13 @@
+{
+  "Parameters": {
+    "AppNamesectionsput": "zip-lambda-section-put",
+    "RepositoryUrl": "https://github.com/BH-PPS-ILI-Software-Engineering/Soteria.git",
+    "SourceBranch": "US412346-Autocomplete-API",
+    "SourceFolder": "src/ppsSoteriaEndPoint_InspectionContext_Section_PUT",
+    "CodeBuildSGs": "sg-011bb8acb1db10082,sg-059f6c7dd6d40c232",
+    "Env": "prod",
+    "LambdaFolder": "section_put",
+    "LambdaZipName": "service.zip",
+    "PipelineArtifactsBucketName": "031331271807-us-east-1-soteria-resource-api"
+  }
+}

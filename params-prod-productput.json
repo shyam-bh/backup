@@ -1,0 +1,13 @@
+{
+  "Parameters": {
+    "AppNameproductput": "zip-lambda-product-put",
+    "RepositoryUrl": "https://github.com/BH-PPS-ILI-Software-Engineering/Soteria.git",
+    "SourceBranch": "US412346-Autocomplete-API",
+    "SourceFolder": "src/ppsSoteriaEndPoint_InspectionContext_Product_PUT",
+    "CodeBuildSGs": "sg-0ebd0d0f4a8c91502,sg-09b45e0fd657f36e7",
+    "Env": "prod",
+    "LambdaFolder": "product_put",
+    "LambdaZipName": "service.zip",
+    "PipelineArtifactsBucketName": "023240594080-us-east-1-soteria-resource-api"
+  }
+}

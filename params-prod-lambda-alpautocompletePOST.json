@@ -1,0 +1,21 @@
+{
+  "Parameters": {
+     "FunctionName": "Endpoint_alp_autocomplete_POST",
+     "S3LambdaArchiveBucket": "031331271807-us-east-1-soteria-resource-api",
+     "S3LambdaArchiveName": "allpipeline/filtervalues/autocomplete_service.zip",
+     "LambdaHandler": "service",
+     "EnvVarJson": "{\"dbhost\":\"sotpgp01.cmfp0hzpisny.us-east-1.rds.amazonaws.com\",\"dbport\":\"5432\",\"dbuser\":\"ppsrootinfra\",\"dbpass\":\"9kcVI46nW8sgXBew\",\"dbname\":\"ili_inpsection_ctx\"}",
+     "Architectures": "x86_64",
+     "Runtime": "go1.x",
+     "Timeout": "900",
+     "SecretManagerAccessPolicy": "false",
+     "S3AccessPolicy": "true",
+     "UseVPC": "true",
+     "VPCSecurityGroupIDs": "sg-0deae40400fe966f3",
+     "CustomPolicy": "",
+     "UseALB": "false",
+     "SubnetId": "subnet-0063ce82b15b40105,subnet-08a4c29f7786f96c1",
+     "MemorySize": "128",
+     "SQSarn": ""
+  }
+}

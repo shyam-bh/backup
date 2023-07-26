@@ -1,0 +1,13 @@
+{
+  "Parameters": {
+    "AppNamelegacyBHGET": "zip-lambda-legacybh-get",
+    "RepositoryUrl": "https://github.com/BH-PPS-ILI-Software-Engineering/Soteria.git",
+    "SourceBranch": "US424850-AllPipelines-Endpoints-API",
+    "SourceFolder": "src/ppsSoteriaEndPoint_OverviewPage-API-LegacyBH_GET",
+    "CodeBuildSGs": "sg-011bb8acb1db10082,sg-059f6c7dd6d40c232",
+    "Env": "prod",
+    "LambdaFolder": "legacyBH_get",
+    "LambdaZipName": "service.zip",
+    "PipelineArtifactsBucketName": "031331271807-us-east-1-soteria-resource-api"
+  }
+}
