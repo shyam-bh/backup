@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lci-svc-config
+data:
+  lci-svc.conf: |
+    {"host":"faspgd03.cslxdto2ana3.us-east-1.rds.amazonaws.com","dbname":"lcidbdev","username":"lcidbdev","password":"lcidb$dev123","pgport":5432}

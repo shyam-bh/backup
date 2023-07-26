@@ -1,0 +1,15 @@
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: notification-pv-volume1
+  namespace: default
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 25Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: '/root/efs-mount-point/fs-dev/notification-pv'

@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rbac-config
+data:
+    
+  ACCS-path.conf: |
+    [
+    {
+    "path": "/templates",
+    "methods": [
+      {
+        "method": "GET",
+        "scopes": [":fs-read-scope"]
+      },
+      {
+        "method": "POST",
+        "scopes": [":fs-create-scope"]
+      },
+      {
+        "method": "DELETE",
+        "scopes": [":fs-delete-scope"]
+      }      
+    ]
+    },
+    {
+    "path": "/emails",
+    "methods": [
+              {
+        "method": "POST",
+        "scopes": [":fs-send-mail-scope"]
+              }
+               ]
+     },
+        {
+    "path": "/templates/:id",
+    "methods": [
+              {
+        "method": "DELETE",
+        "scopes": [ ":fs-delete-scope" ]
+              },
+              {
+        "method": "GET",
+        "scopes": [":fs-read-scope"]
+              }
+               ]
+         }
+
+    ]

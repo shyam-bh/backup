@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alert-tenant-config
+data:
+  alert_tenant.conf: |
+    {
+    "SPARQ-DEV": {
+      "properties": {
+        "DB_HOST": "fsdpgd05.c6ooanpu2tgf.us-east-1.rds.amazonaws.com",
+        "DB_PORT": "5432",
+        "DB_NAME": "fsdpgd05",
+        "BROKER_CONNECTION_STRING": "amqps://fsalert:AQBHk0iKSf28mGP6@b-f15207c5-bb94-4a13-8f93-216ff44cdb5b.mq.us-east-1.amazonaws.com:5671",
+        "PG_TLS": "true",
+        "MQ_ENDPOINT": "Alert_Topic",
+        "MAX_PAGE_SIZE": "3000",
+        "ROUTING_KEYS": "tenant,source,groupId,operation,typeId",
+        "SUB_GROUP_LIMITS": "3000,10000,50000,200000"
+      },
+      "secrets": {
+        "DB_USERNAME": "/app/tenant-info/DB_USERNAME",
+        "DB_PASSWORD": "/app/tenant-info/DB_PASSWORD",
+        "BROKER_PASSWORD": "/app/tenant-info/BROKER_PASSWORD"
+      }
+    },
+    "0b241a24-22ea-4c0f-ab8b-2972c3d5b5cc": {
+      "properties": {
+        "DB_HOST": "fsdpgd05.c6ooanpu2tgf.us-east-1.rds.amazonaws.com",
+        "DB_PORT": "5432",
+        "DB_NAME": "alert_hash_0b241a24_22ea_4c0f_ab8b_2972c3d5b5cc",
+        "BROKER_CONNECTION_STRING": "amqps://fsalert:AQBHk0iKSf28mGP6@b-f15207c5-bb94-4a13-8f93-216ff44cdb5b.mq.us-east-1.amazonaws.com:5671",
+        "BROKER_PASSWORD": "Ra181gz07nd3",
+        "PG_TLS": "true",
+        "REDIS_PASSWORD": "Fs8app5cJ3yM4Dalr",
+        "MQ_ENDPOINT": "0b241a24-22ea-4c0f-ab8b-2972c3d5b5cc",
+        "MAX_PAGE_SIZE": "3000",
+        "ENABLE_NOTIFICATION": "true",
+        "ROUTING_KEYS": "tenant,source,groupId,operation,typeId",
+        "SUB_GROUP_LIMITS": "3000,10000,50000,200000"
+      },
+      "secrets": {
+        "DB_USERNAME": "/app/tenant-info/0B241A24-22EA-4C0F-AB8B-2972C3D5B5CC_DB_USERNAME",
+        "DB_PASSWORD": "/app/tenant-info/0B241A24-22EA-4C0F-AB8B-2972C3D5B5CC_DB_PASSWORD",
+        "BROKER_PASSWORD": "/app/tenant-info/0B241A24-22EA-4C0F-AB8B-2972C3D5B5CC_BROKER_PASSWORD"
+      }
+    },
+   
+    "7a896e2b-f47e-487a-a8ca-e8aefe263239": {
+      "properties": {
+        "DB_HOST": "fsdpgd05.c6ooanpu2tgf.us-east-1.rds.amazonaws.com",
+        "DB_PORT": "5432",
+        "DB_NAME": "alert_hash_7a896e2b_f47e_487a_a8ca_e8aefe263239",
+        "BROKER_CONNECTION_STRING": "amqps://fsalert:AQBHk0iKSf28mGP6@b-f15207c5-bb94-4a13-8f93-216ff44cdb5b.mq.us-east-1.amazonaws.com:5671",
+        "BROKER_PASSWORD": "Ra181gz07nd3",
+        "PG_TLS": "true",
+        "REDIS_PASSWORD": "Fs8app5cJ3yM4Dalr",
+        "MQ_ENDPOINT": "7a896e2b-f47e-487a-a8ca-e8aefe263239",
+        "MAX_PAGE_SIZE": "3000",
+        "ENABLE_NOTIFICATION": "true",
+        "ROUTING_KEYS": "tenant,source,groupId,operation,typeId",
+        "SUB_GROUP_LIMITS": "3000,10000,50000,200000"
+      },
+      "secrets": {
+        "DB_USERNAME": "/app/tenant-info/7a896e2b-f47e-487a-a8ca-e8aefe263239_DB_USERNAME",
+        "DB_PASSWORD": "/app/tenant-info/7a896e2b-f47e-487a-a8ca-e8aefe263239_DB_PASSWORD",
+        "BROKER_PASSWORD": "/app/tenant-info/7a896e2b-f47e-487a-a8ca-e8aefe263239_BROKER_PASSWORD",        
+        "CLIENT_SECRET": "/app/tenant-info/7a896e2b-f47e-487a-a8ca-e8aefe263239_CLIENT_SECRET"
+      }
+    },
+    "RBACTestAdi": {
+      "properties": {
+        "DB_HOST": "fsdpgd05.c6ooanpu2tgf.us-east-1.rds.amazonaws.com",
+        "DB_PORT": "5432",
+        "DB_NAME": "alert_hash_rbactestadi",
+        "BROKER_CONNECTION_STRING": "amqps://fsalert:AQBHk0iKSf28mGP6@b-f15207c5-bb94-4a13-8f93-216ff44cdb5b.mq.us-east-1.amazonaws.com:5671",
+        "BROKER_PASSWORD": "Ra181gz07nd3",
+        "PG_TLS": "true",
+        "REDIS_PASSWORD": "Fs8app5cJ3yM4Dalr",
+        "MQ_ENDPOINT": "RBACTestAdi",
+        "MAX_PAGE_SIZE": "3000",
+        "ENABLE_NOTIFICATION": "true",
+        "ROUTING_KEYS": "tenant,source,groupId,operation,typeId",
+        "SUB_GROUP_LIMITS": "3000,10000,50000,200000"
+      },
+      "secrets": {
+        "DB_USERNAME": "/app/tenant-info/RBACTestAdi_DB_USERNAME",
+        "DB_PASSWORD": "/app/tenant-info/RBACTestAdi_DB_PASSWORD",
+        "BROKER_PASSWORD": "/app/tenant-info/RBACTestAdi_BROKER_PASSWORD",
+        "CLIENT_SECRET": "/app/tenant-info/RBACTestAdi_CLIENT_SECRET"
+      }
+    },
+    "0b241a24-22ea-4c0f-ab8b-2972c3d5b4cc": {
+      "properties": {
+         "DB_NAME": "alert_hash_0b241a24-22ea-4c0f-ab8b-2972c3d5b4cc",
+      }
+    },
+    "0b241a24-22ea-4c0f-ab8b-2972c3d5b4ee": {
+      "properties": {
+         "DB_NAME": "alert_hash_0b241a24-22ea-4c0f-ab8b-2972c3d5b4ee",
+      }
+    }
+    }

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dep-appshell-usermngt
+  labels:
+    app: dep-appshell-usermngt
+spec:
+  replicas: 1
+  selector:
+    matchLabels: 
+      app: dep-appshell-usermngt
+  template:
+    metadata:
+      labels:
+        app: dep-appshell-usermngt
+    spec:
+      containers:
+        - name: dep-appshell-usermngt
+          image: fastlca-registry-dev.np-0000189.npause1.bakerhughes.com/cde-appshellusermngt:6
+          env:
+          - name: TENANT_INFO
+            valueFrom:
+              configMapKeyRef:
+                name: appshellusermngt-config
+                key: appshellusermngt.conf
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8086
+      imagePullSecrets:
+        - name: fastlca-dev-cred      
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: {{ .Values.service.internalPort }}
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: {{ .Values.service.internalPort }}

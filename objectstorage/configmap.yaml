@@ -1,0 +1,75 @@
+kind: ConfigMap
+apiVersion: v1
+metadata: 
+ name: objectstorage-config
+data:
+ minio.endPoint: "https://quad-minio-dev.np-0000174.npause1.bakerhughes.com"
+ minio.accessKey: "minioadmin"
+ minio.bucketName: "quad"
+ minio.expiryTime: "3600"
+ folderAccess: "{/*}"
+ keycloak.realm: "objectstore-1"
+ keycloak.auth-server-url: "https://keycloak.np-0000177.npause1.bakerhughes.com/auth"
+ abac.support: "disabled"
+ dfcs.url: "NA"
+ cache.ttl: "10"
+ authorization.type: "open"
+ keycloak.resource: "Object-Meta"
+ filter.url-exclusion-list: "/error,/swagger-ui.html,/webjars,/swagger-resources,/api-docs,/actuator,/health,/v1.0/publish/pubsub/,/dapr/*,/subscribe"
+ rbac.support: "enabled"
+ app.name: "ObjectStore"
+ app.address: "workernode-123"
+ app.instance.id: "99999"
+ keycloak.cors: "true"
+ objectstorage-tenant.config: |
+       {  
+          "DEFAULT": {
+            "resource":"default_client"
+          },
+          "objectstore-1":{
+            "resource": "app-objectstore",
+            "credentials": {
+               "secret": "VdOYWNxcEwXTahhoqLHquKK5bZXeomRP"
+               }
+            }
+       }
+ objectstorage-client.config: |
+       {
+                           "policy-enforcer": {
+                             "enforcement-mode": "ENFORCING",
+                             "paths": [
+                                 {
+                                     "path": "/v2/object/search",
+                                     "methods": [
+                                            {
+                                                 "method": "GET",
+                                                 "scopes": ["search_object_scope"]  
+                                            }
+                                     ]
+                                 },
+                                 {
+                                     "path": "/v2/object/*",
+                                     "methods": [
+                                            {
+                                                 "method": "PUT",
+                                                 "scopes": ["upload_object_scope"]  
+                                            },
+                                            {
+                                                 "method": "GET",
+                                                 "scopes": ["download_object_scope"]  
+                                            },
+                                            {
+                                                 "method": "DELETE",
+                                                 "scopes": ["delete_object_scope"]  
+                                            },
+                                            {
+                                                 "method": "PATCH",
+                                                 "scopes": ["add_tag_scope"]  
+                                            },
+                                     ]
+                                 }
+                               ]
+                           }
+       }
+    
+

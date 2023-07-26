@@ -1,0 +1,55 @@
+kind: ConfigMap
+apiVersion: v1
+metadata: 
+ name: gateway-service-configmap
+data: 
+ REDIS_PORT: "6379"
+ REDIS_HOST: redis.default
+ GWS_COMMAND_HISTORY_URL: http://dbis-service-service.default/v1/dbis/commands/result/info
+ GWS_COMMAND_STATUS_URL: http://dbis-service-service.default/v1/dbis/commands/status
+ GWS_HEALTH_STATS_INFO: http://dbis-service-service.default/v1/dbis/health-stats
+ GWS_HEALTH_STATS_SUMM: http://dbis-service-service.default/v1/dbis/health-stats/summary
+ GWS_DEVICE_REGISTRATION_STATUS: http://dbis-service-service.default/v1/dbis/registration/info/
+ GWS_DEVICE_DELETE_GATEWAY: http://dbis-service-service.default/v2/dbis/registration/info?transactionId={transactionId}&deploymentId={deploymentId}
+ GWS_CONTAINER_HEALTH_STATS: http://dbis-service-service.default/v1/dbis/container/health-stats
+ DOCKER_REGISTRY_URL: https://280307018626.dkr.ecr.us-east-1.amazonaws.com
+ DOCKER_REPOSITORY_IMAGE_PREFIX: 280307018626.dkr.ecr.us-east-1.amazonaws.com
+ DOCKER_REGISTRY_IMAGES_ENDPOINT: /v1/aws-ecr/images
+ GWS_DEVICE_CREATE_GATEWAY: http://dcd-service.default/v1/data-collector-dep-services/deployment
+ GWS_GET_DEVICE_LIST : http://dcm-service.default/v1/data-collector-services/info
+ GWS_GET_APPROVED_DEVICE : http://pipeline-manager-service-service.default/v1/pipeline-manager-services/devices
+ GWS_DEVICE_REGISTRATION_STATUS_V2: http://dbis-service-service.default/v2/dbis/registration/info/
+ GWS_GROUP_URL: http://dbis-service-service.default/v2/dbis/device-group/group
+ GWS_GROUP_DELETE_URL: http://dbis-service-service.default/v2/dbis/device-group/group?groupId={groupId}
+ GWS_GROUP_GATEWAY_PATCH: http://dbis-service-service.default/v2/dbis/device-group/group/gateway
+ GWS_EDGE_DETAILS_URL: http://dbis-service-service.default/v1/dbis/device-info/devices
+ GWS_EDGE_DELETE_URL: http://dbis-service-service.default/v1/dbis/device-info/device/{deviceId}
+ GWS_EDGE_MAKE_ADD_URL: http://dbis-service-service.default/v1/dbis/device-info/device
+ GWS_DEVICE_STATUS_URL: http://dbis-service-service.default/v1/dbis/registration/devices
+ GWS_APPROVED_GATEWAY_URL: http://dbis-service-service.default/v2/dbis/registration/approvedgateways?transactionId={transactionId}
+ GWS_REJECTED_GATEWAY_URL: http://dbis-service-service.default/v2/dbis/registration/rejectedgateways?transactionId={transactionId}
+ GWS_CREATED_GATEWAY_URL: http://dbis-service-service.default/v2/dbis/registration/createdgateways?transactionId={transactionId} 
+ GWS_CREATED_GROUP_URL: http://dbis-service-service.default/v2/dbis/device-group/createdgroups
+ GWS_COMMAND_HISTORY_EVENT: http://dbis-service-service.default/v1/dbis/commands/event/detail
+ BLOB_STORAGE_BASE_URL: http://svc-blob-store/v1/files/
+ OTA_SERVICE_BASE_URL: http://otamanager-service/ota
+ DBIS_BASE_URL: http://dbis-service-service.default
+ PMS_BASE_URL: http://pipeline-manager-service-service.default
+ TMS_BASE_URL: http://token-generator-service.default
+ OTA_COMMAND_TIMEOUT_IN_MINS: "240"
+ INSTALL_IMAGE_TIMEOUT_IN_MINS: "5"
+ LOGGING_LEVEL: INFO
+ EXLUDE_URL_PATTERN: "/stream,/notify/statusUpdate,/swagger-ui.html,/v2/api-docs,/webjars/springfox-swagger-ui,/swagger-resources,/error"
+ KEYCLOAK_REALM: "IQUITY"
+ KEYCLOAK_SERVER_URL: "http://svc-keycloak.default/auth"
+ KEYCLOAK_SSL_REQUIRED: "external"
+ CLIENT_ID: "e2c-client"
+ CLIENT_SECRET: "26b6bb3c-8ad9-49d3-afd1-1e5316ebb35f"
+ SS_USER_INFO_URL: "http://svc-bhsecurityservice/auth/realms/%s/protocol/openid-connect/userinfo"
+ DEFAULT_CPU_MAX_LIMIT_PERCENTAGE: "70"
+ DEFAULT_RAM_MAX_LIMIT_PERCENTAGE: "70"
+ GWS_ACTIVATE_DEVICE_URL: http://dcm-service.default/v1/data-collector-services/activateDevice/{deviceId}
+ DEVICE_POLLING_CONFIG_URL: http://dbis-service-service.default/edge-device/v2/dbis/deviceId
+ GWS_TIME_TO_ACTIVE_URL: http://dcm-service.default/v1/data-collector-services/getTimeToActive/{deviceId}
+ TENANT_CONFIG_DETAILS: '{"IQUITY":{"resource":"e2c-client","credentials":{"secret":"26b6bb3c-8ad9-49d3-afd1-1e5316ebb35f"}}}'
+ 

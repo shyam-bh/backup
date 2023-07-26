@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: object-store-configmap-default
+data: 
+  default.conf: |
+    {
+      "properties" :{
+        "BUCKET_NAME": "objectstorebucket",
+        "BASE_FOLDER": "Objectstore"
+        
+        },
+        "encoded-properties":{
+          "p1" :"dmFsdWUgaW4gYmFzZTY0Zm9ybWF0Cg==" 
+        }
+    }

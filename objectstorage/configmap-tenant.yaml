@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: objectstorage-configmap-tenant
+data: 
+  tenant.conf: |
+    {
+    "9fa85f65-6822-9580-b4fc-2d963f66afa8": 
+        {
+    "properties": 
+            {
+            "tenant_name": "tenant1",
+            "BUCKET_NAME": "objectstorebucket",
+            "BASE_FOLDER": "Objectstore"
+            },
+            "encoded-properties":{
+                "client_secret" :"VmRPWVdOeGNFd1hUYWhob3FMSHF1S0s1YlpYZW9tUlA=" 
+              }
+        },
+     "9fa85f65-6822-9581-b4fc-2d963f66afa8": 
+        {
+    "properties": 
+            {
+            "tenant_name": "tenant2",
+            "BUCKET_NAME": "objectstorebucket",
+            "BASE_FOLDER": "Objectstore"
+            },
+            "encoded-properties":{
+                "client_secret" :"VmRPWVdOeGNFd1hUYWhob3FMSHF1S0s1YlpYZW9tUlA=" 
+              }
+        },
+     "8fa85f64-5717-4562-b3fc-2c963f66afa7":{
+            "properties": 
+            {
+              "BUCKET_NAME": "objectstorebucket",
+              "BASE_FOLDER": "Objectstore",
+              "tenant_name": "objectstore-1",
+              "serverSideEncryption":"default",
+              "https":"false"
+            },
+            "secrets":
+            {
+              "client_secret": "/volume/tenant-secret-objstore/client_secret"
+            },
+            "encoded-properties":{
+                "secret" :"VmRPWVdOeGNFd1hUYWhob3FMSHF1S0s1YlpYZW9tUlA=" 
+              }
+            }
+    }
+

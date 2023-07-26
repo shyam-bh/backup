@@ -1,0 +1,14 @@
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: 'notification-pv-claim1'
+  namespace: default
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+     requests:
+       storage: 25Gi
+  volumeName: 'notification-pv-volume1'
+  storageClassName: manual

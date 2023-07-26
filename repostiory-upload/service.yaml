@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata: 
+  name: docker-upload-service
+spec: 
+  ports: 
+    - 
+      name: docker-upload-service
+      port: 80
+      nodePort: 30271 
+      protocol: TCP
+      targetPort: 8084
+  selector: 
+    app: docker-upload
+  type: NodePort

@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dep-advisories-service
+  labels:
+    app: dep-advisories-service
+  annotations:
+    configmap.reloader.stakater.com/reload: "advisory-pgdb-config"
+spec:
+  replicas: 2
+  selector: 
+    matchLabels:
+     app: dep-advisories-service
+  template:
+    metadata:
+      labels:
+        app: dep-advisories-service
+    spec:
+      imagePullSecrets:
+        - name: cde-reg-credentials
+      containers:
+        - name: dep-advisories-service
+          image: ghcr.io/bh-ent-tech/advisory:v1.2.0.20
+          env:
+          - name: dep-advisories-service
+            value: "http://svc-bhsecurityservice:80"
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: advisory-pgdb-config
+                key: DB_HOST
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: advisory-pgdb-config
+                key: DB_PORT
+          - name: DB_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                name: advisory-pgdb-config
+                key: DB_USERNAME
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: advisory-postgresdb-key
+                key: DB_PASSWORD
+          - name: DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: advisory-pgdb-config
+                key: DB_NAME
+          - name: SSU
+            value: "http://svc-bhsecurityservice:80"
+          - name: SSU8s9jth25ar
+            value: "https://fs-dev.np-0000177.npause1.bakerhughes.com/bh-auth"
+          - name: client_id8s9jth25ar
+            value: "alert"
+          - name: client_secret8s9jth25ar
+            value: "887340ab-32f5-43ff-a8b3-70dd226f4485"
+          - name: NODE_ENV
+            value: "dev"
+          - name: REDIS_KEY_PREFIX
+            value: "adv"
+          - name: NOTIFICATION_URL
+            value: "https://wellinkmc-dev.ps.fullstream.ai"
+          - name: NOTIFICATION_DOMAIN 
+            value: "sed"
+          - name: NOTIFICATION_SERVICEID 
+            value: "Entitlement"
+          - name: REDIS_HOST 
+            value: "clustercfg.sce1xbfthdk69maj.hacmdt.use1.cache.amazonaws.com"
+          - name: NEW_RELIC_APP_NAME
+            value: "Advisories-FS-DEV"
+          - name: NEW_RELIC_LICENSE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: newrelic-license
+                key: NEW_RELIC_LICENSE_KEY
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: advisories-app
+            - containerPort: 5432
+              name: postgres-db
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: {{ .Values.service.internalPort }}
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: {{ .Values.service.internalPort }}

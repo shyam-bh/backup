@@ -1,0 +1,84 @@
+def COMMIT_ID
+def REPO_BRANCH
+pipeline {  
+    agent { 
+      //label 'e2c'
+      label 'e2c'
+    } 
+options {
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '30'))
+  } 
+
+    parameters {
+        
+        string(name: 'IMAGE_NAME', defaultValue: '', description: 'provide the image tag to be deployed like alert-2.0:v1.2.0.591')
+        string(name: 'dest_docker_registry_username', defaultValue: '', description: 'provide the username for target registry')
+        string(name: 'dest_docker_registry_password', defaultValue: '', description: 'provide the password for target registry')
+        string(name: 'SOURCE_REGISTRY_NAME', defaultValue: 'ghcr.io/bh-ent-tech', description: 'provide the registry name from which image needs to be pulled')
+		string(name: 'TARGET_REGISTRY_NAME', defaultValue: '', description: 'provide the registry name where image needs to be pushed')
+    }	
+    environment {  
+    
+             
+        gitcred = credentials('bh-ent-tech-ghcr-token')
+        // image tag format: major.minor.bulidNumber-gitHash
+        TAG = "1.1.${env.BUILD_ID}"
+	
+
+    }
+    stages {  
+	/*
+        // Gets source and generates git hash      
+        stage('Get Sources') {
+            steps {                                     
+              checkout scm
+              script {
+
+                sh "git rev-parse --short HEAD > .git/commit-id"
+                COMMIT_ID = readFile('.git/commit-id').trim()   
+                sh "git name-rev --name-only HEAD > .git/branch-name" 
+                REPO_BRANCH = readFile('.git/branch-name').trim()   
+                FULL_IMAGE_NAME = "${IMAGE_NAME}_${TAG}-${COMMIT_ID}"
+				currentBuild.displayName = "${IMAGE_NAME}"
+
+              }
+              echo "BRANCH: ${REPO_BRANCH}"
+            }
+        }
+        */
+        // Builds image with tag ':branch-latest' and 'Major.Minor-branch-BuildNumber-git hash' 
+        stage('Image pull and push') {
+            steps{
+			    script{
+					currentBuild.displayName = "${IMAGE_NAME}"
+				}
+
+                sh '''
+              
+		docker login --username ${gitcred_USR} ${SOURCE_REGISTRY_NAME} --password ${gitcred_PSW}
+                docker pull ${SOURCE_REGISTRY_NAME}/${IMAGE_NAME}   
+                docker logout
+              docker login --username ${dest_docker_registry_username} ${TARGET_REGISTRY_NAME} --password ${dest_docker_registry_password}
+                
+                
+                
+                docker tag ${SOURCE_REGISTRY_NAME}/${IMAGE_NAME} ${TARGET_REGISTRY_NAME}/${IMAGE_NAME}
+                docker push ${TARGET_REGISTRY_NAME}/${IMAGE_NAME}    
+
+                docker rmi ${SOURCE_REGISTRY_NAME}/${IMAGE_NAME}    
+                docker rmi ${TARGET_REGISTRY_NAME}/${IMAGE_NAME}     
+				'''
+                   
+            }            
+        }
+        
+    }
+    // Workspace cleanup
+    post { 
+        always { 
+            cleanWs()
+          }
+    }
+    
+}

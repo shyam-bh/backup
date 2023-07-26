@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-security-adapter
+  labels:
+    app: security-adapter
+spec:
+  type: NodePort
+  ports:
+  - name: adapter
+    port: 80
+    nodePort: 30210
+    targetPort: 5000
+  selector:
+    app: dep-security-adapter
+

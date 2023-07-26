@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: appshellusermngt-config
+data:
+  appshellusermngt.conf: |
+       {"userManagementUrl": "https://fastlca-dev.np-0000189.npause1.bakerhughes.com/bh-usermgmt"}

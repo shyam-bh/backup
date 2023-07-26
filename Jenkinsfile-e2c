@@ -1,0 +1,270 @@
+	def userInput
+	def buildVersion = ''
+	def git_url = 'https://github.com/bh-ent-tech/ogd-bh-e2c-analytic-engine.git' // update gitrepo details accordingly in git_url variable to checkout the code.  
+	def to_list = 'BH_Digital_DevOps@bakerhughes.com' // Please replace the to_list with required email ids.
+	pipeline{
+		agent {
+			node{
+				label 'e2c'
+				//customWorkspace '/home/jenkins/workspace/mtc_jobs/Alerts2/bh-devops-CI-workspace/'
+			}
+		}
+	// customWorkspace to be defined in case of using camav scan.    
+		options {
+		disableConcurrentBuilds()
+		buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '30'))
+	  } 
+
+		parameters {
+			string(name: 'Major', defaultValue: '1', description: 'provide the Major version')
+			string(name: 'Minor', defaultValue: '2', description: 'provide the Minor version')
+			string(name: 'Revision', defaultValue: '', description: 'Keep it empty if BuildType is Normal. Provide Revision if BulidType is Patch')
+			choice(name: 'BuildType', choices: ['Normal','Patch','Patch'])
+			string(name: 'image_build', defaultValue: 'ogd-bh-e2c-analytic-engine', description: 'provide the name of the image to be built')
+			  string(name: 'registry_name', defaultValue: 'e2c-registry-dev.np-0000173.npause1.bakerhughes.com', description: 'provide the docker registry name to push the image')
+			string(name: 'Branch_to_Build', defaultValue: 'develop', description: 'branch to be checked out for building the code')
+		}
+	/*
+	 define the credentials to be used according to the project requirements in environment.
+	 
+	 */
+		environment {
+			cdecred = credentials('e2c-dev-registry')
+			gitcred = credentials('NEW_BH_GIT')
+
+		}
+		stages{
+			stage('Check prerequisites'){
+				steps{
+					script{
+						
+					 if ("${params.image_build}" == ''){
+						currentBuild.result = 'ABORTED'
+						error('Image name not provided !!!')
+						}
+					}
+				}
+			}
+	// update gitrepo details accordingly in git_url variable defined on top, to checkout the code.        
+			stage("Git Checkout")
+			{
+				steps{
+					git branch: "${Branch_to_Build}" , credentialsId: 'NEW_BH_GIT', url: "${git_url}"
+				}
+			}
+
+	//change the agent docker image in case of different maven version to be used.  
+/*
+			stage('Maven Build')
+			{
+
+				steps {
+				  sh '''	
+					java -version
+					mvn --version
+					mvn clean install -s settings.xml -Dmaven.test.skip=true 
+					'''
+				} 
+			} 
+	
+	this stage is for checking the sonar results. Update the pom.xml with the required plugins needed for sonar analysis.
+	You can enable this stage if sonarqube setting is added in your source code.
+
+		stage('SonarQube Analysis') {
+		  steps {
+			script {
+			  try {
+				withSonarQubeEnv('SONAR_URL') {
+				sh """ mvn clean install org.sonarsource.scanner.maven:sonar-maven-plugin:3.8:sonar  """              
+				  }   
+				}
+			  catch (Throwable err) {
+			  currentBuild.result = 'FAILED'
+			  error("SonarQube Analysis FAILED")
+			  }
+			}
+		  }
+		}
+	*/
+
+	/*
+	 use this stage for triggering the clamav scan for java projects.
+	 
+			 stage('Scanning the Artifacts using clamav scan')
+			{  
+				steps{
+					script{
+					
+					sh '''
+					pwd
+					echo ${WORKSPACE}
+					ls *.jar | tee bldjars.txt
+					cat bldjars.txt
+					while IFS= read -r line; do 
+					ls -l $line
+					curl -s -XPOST http://172.16.240.214:8080/api/v1/scan -F FILES=@./${line} | jq . >> scan.out
+					flg=$(grep -w "is_infected" scan.out | awk '{ print $2}'| sed 's/,//g')
+					echo $flg 
+					if [ -z "$flg" ];
+					then
+					{
+						echo 'No value in flg'  
+					} 
+					elif [ "$flg" == "true" ];
+					then
+					{
+						echo "Virus detected, hence aborting build. please check"
+						exit 1
+					}
+					elif [ "$flg" == "false" ];
+					then
+					{
+						echo "No Virus detected, hence proceeding build. "
+						
+					}
+					
+					else
+						echo "None of the condition met"
+					fi			
+					done < bldjars.txt
+					cat scan.out  
+					'''
+					}
+				}
+			}
+
+
+	*/	
+		/*
+	For clam AV scan report we need to trigger a freestyle job which will be scanning the artifacts present in the custom workspace defined in agents. 
+	Please refer avscan-report.doc within the documents folder for creating the freestyle job. 
+	Path to the freestyle job needs to be updated accordingly in build job in below stage.
+
+			stage('Publish AV scan Report')
+			{
+				steps{
+					echo "This stage is to trigger downstream job to publish Antivirus Scan Report"
+					build job: 'avscan-report'
+				  
+				}
+			}
+		*/
+	// use this stage to lint the dockerfile. If the path of Dockerfile is different update the commands accordingly, here we have dockerfile in base path.
+	 
+	stage ("lint dockerfile") {
+		agent {
+			docker {
+				image 'hadolint/hadolint:latest-debian'
+				reuseNode true
+			}
+		}
+		steps {
+			sh 'hadolint ./Dockerfile | tee -a dockerfile_lint.txt'
+		}
+		post {
+			always {
+				archiveArtifacts 'dockerfile_lint.txt'
+			}
+		}
+	}
+
+	/*
+	Assuming the dockerfile is present in base path, otherwise update the build command accordingly.
+	This stage do the docker build, tag and push to registry. It creates a git tag and push it in github for builds from master or main branches. 
+	*/
+			stage("Docker Image Build")
+			{
+				environment{
+					giturl="${git_url}"
+				}
+				steps{
+					script{
+					wrap([$class: 'BuildUser']) {
+
+				sh '''
+				if [ "$BuildType" == "Normal" ]
+					then
+					patch=0
+					fi
+					if [ "$BuildType" == "Patch" ]
+					then
+					patch="$BUILD_NUMBER"
+					BUILD_NUMBER=$Revision
+					fi
+				  image_name=${registry_name}/${image_build}:v$Major.$Minor.$patch.$BUILD_NUMBER
+				  version="v$Major.$Minor.$patch.$BUILD_NUMBER"
+				 echo $version > buildversion.txt
+				echo $image_name
+				docker login --username ${cdecred_USR} ${registry_name} --password ${cdecred_PSW}
+				docker build -t $image_name .
+				docker push $image_name
+				docker images
+				docker rmi $image_name
+				if [ "$Branch_to_Build" == "master" ] || [ "$Branch_to_Build" == "main" ];
+					then {
+				echo "${giturl}"
+				git config --local user.name "Jenkins"
+				git config --local credential.helper "!f() { echo username=\$gitcred_USR; echo password="\$gitcred_PSW"; }; f"
+				git tag -a "$version" -f -m "Created By:\${BUILD_USER} , branch:${Branch_to_Build}"
+				git push "${giturl}" "$version"
+				}
+				fi
+				'''
+				buildVersion = readFile('buildversion.txt').trim()
+				currentBuild.displayName = "$image_build:$buildVersion"
+				  
+				}
+				}
+				}
+			}
+	/* This stage checks the vulnerability within the docker images using anchor scan. 
+	By default the job fails if there is any high or Critical vulnerability, in order to bypass it please set bailOnFail: false
+	
+		stage('Vulnerability Scan with Anchore') {
+				environment {
+				imageLine = "${registry_name}${image_build}:${buildVersion}"
+				}
+
+			  steps {
+
+
+			writeFile file: 'anchore_images', text: imageLine
+			anchore name: 'anchore_images',  bailOnFail: true
+
+			  }
+			}
+	*/		
+	/*
+	You can enable this stage if you want to update the image version in deployment repo. 
+	This stage will update the yaml files in github and deploy it using argocd. 
+	Please create the job with name update_deployment_manifest using the CD/Jenkinsfilecd-with-argocd-manifest-update script.
+	update_deployment_manifest job path needs to be updated accordingly.
+
+			stage('Update Manifest'){
+				steps {
+					script {
+							echo "Proceeding with comitting the changes on GitHub..."
+							build job: './update_deployment_manifest', 
+					parameters: [
+			  string(name: 'IMAGE_NAME', value: "${image_build}"), string(name: 'IMAGE_TAG', value: "${buildVersion}"), string(name: 'REGISTRY', value: "${registry_name}"), string(name: 'DIR_NAME', value: "dev")],
+			  wait: false
+						}
+					}
+				}
+	*/	    
+		}
+		// Workspace cleanup and email trigger.
+		post { 
+			always { 
+		emailext (
+			attachmentsPattern: 'dockerfile_lint.txt',
+					subject: " job status is  ${currentBuild.currentResult} Job ${env.JOB_BASE_NAME} - Build # ${env.BUILD_NUMBER} ",
+					body: """Status of ${env.JOB_BASE_NAME} BUILD # ${env.BUILD_NUMBER} is ${currentBuild.currentResult}, You can check console output at ${env.BUILD_URL}console
+					""",
+					to: "${to_list}"
+				)
+				cleanWs()
+			
+			  }
+		}
+	}

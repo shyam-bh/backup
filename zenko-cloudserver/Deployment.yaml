@@ -1,0 +1,56 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zenko
+  annotations:
+    configmap.reloader.stakater.com/reload: "config-map-zenko"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zenko
+  template:
+    metadata:
+      labels:
+        app: zenko
+    spec:
+      imagePullSecrets:
+      - name: fastlca-dev-cred
+      containers:
+      - name: zenko
+        #image: ghcr.io/bh-ent-tech/zenko-cloudserver:v1.2.0.264
+        image: fastlca-registry-dev.np-0000189.npause1.bakerhughes.com/zenko-cloudserver:v1.2.0.264
+        ports:
+          - name: main
+            containerPort: 8000
+        env:
+          - name: SCALITY_ACCESS_KEY_ID
+            value: "fastlca"   #Please set this to any string. Same value must then be set in Object storage service
+          - name: SCALITY_SECRET_ACCESS_KEY
+            valueFrom: 
+              secretKeyRef: 
+                key: zenko_secretKey
+                name: zenko-secret-key
+          - name: SSL
+            value: "FALSE"
+          - name: REMOTE_MANAGEMENT_DISABLE
+            value: "1"    
+          - name: LOG_LEVEL
+            value: "info"  #Can be set to trace, debug, info,
+          - name: S3DATA
+            value: "multiple"
+        envFrom:
+        - configMapRef:
+            name: config-map-zenko
+        volumeMounts:
+          - mountPath: /usr/src/app/locationConfig.json
+            subPath: locationConfig.json
+            name: locationconfig
+      volumes:
+        - configMap:
+            name: config-map-zenko
+            items:
+              - key: locationConfig.json
+                path: locationConfig.json              
+          name: locationconfig

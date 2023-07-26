@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dep-bhsecurity-service
+  labels:
+    app: dep-bhsecurity-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dep-bhsecurity-service
+  template:
+    metadata:
+      labels:
+        app: dep-bhsecurity-service
+    spec:
+      imagePullSecrets:
+         - name: e2c-dev-cred
+      containers:
+        - name: dep-bhsecurity-service
+          image: e2c-registry-dev.np-0000173.npause1.bakerhughes.com/bh-security-service:v1.2.0.117
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+          - name: oauth2.provider
+            value: "KEYCLOAK"
+          - name: oauth2.provider.region
+            value: "us-east-1"
+
+          - name: tenant.service.url
+            value: ""
+          - name: okta.service.url
+            value: ""
+
+          - name: custom.pkce
+            value: "disabled"
+
+          - name: oauth2.issuer.url
+            value: "http://svc-keycloak.default/auth/realms/"
+
+          - name: redis.credentials.host
+            value: "cde-ss-dev-redis-cluster.utb9aj.0001.usw2.cache.amazonaws.com"
+
+
+          - name: oauth2.token.url
+            value: "/protocol/openid-connect/token"
+
+          - name: redis.credentials.port
+            value: "6379"
+
+          - name: oauth2.auth.url
+            value: "/protocol/openid-connect/auth"
+
+          - name: okta.service.token.url
+            value: ""
+          - name: oauth2.introspect.token.url
+            value: "/protocol/openid-connect/token/introspect"
+
+
+          - name: okta.service.logout.url
+            value: ""
+          - name: oauth2.logout.url
+            value: "/protocol/openid-connect/logout"
+          - name: tenant.supported.grant
+            value: "password"
+          - name: oauth2.authorize.url
+            value: "/protocol/openid-connect/auth?response_type=code&scope=openid&client_id="
+          - name: idp.multitenant
+            value: "true"
+          - name: oauth2.issuer.public.url
+            value: "https://e2c-keycloak-dev.np-0000173.npause1.bakerhughes.com/auth/realms/"
+          - name: keycloak.auth.server.url
+            value: "http://svc-keycloak.default/auth"
+          - name: oauth2.keycloak.token.url
+            value: "/admin/realms/"
+
+          - name: tenant.idp
+            value: "default"
+
+
+          - name: padding.required
+            value: "false"
+          - name: health.port
+            value: "5678"
+          - name: app.name
+            value: "security-service"
+          - name: app.address
+            value: "ss-adress"
+          - name: app.instance.id
+            value: "1111"
+          - name: swagger.domain.path
+            value: "e2c-dev.np-0000173.npause1.bakerhughes.com/bh-auth"

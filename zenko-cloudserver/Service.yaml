@@ -1,0 +1,22 @@
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: zenko-svc
+  labels:
+    app: zenko
+spec:
+  type: NodePort
+  selector:
+    app: zenko
+  ports:
+  - name: zenko
+    protocol: TCP
+    port: 8000
+    targetPort: 8000
+    nodePort: 30042
+  - name: health-api
+    protocol: TCP
+    port: 8002
+    targetPort: 8002
+    nodePort: 30044

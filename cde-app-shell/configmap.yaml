@@ -1,0 +1,49 @@
+apiVersion: v1
+data:
+  app-shell.conf: |
+      [
+        {
+         "grantType": "oauth2",
+         "clientId": "e2c-client",
+         "uaaURL": "https://e2c-dev.np-0000173.npause1.bakerhughes.com",
+         "redirectUrl": "https://e2c-dev.np-0000173.npause1.bakerhughes.com/authorization-code/callback",
+         "tokenURL" : "/bh-auth",
+         "uaaClientSecret": "26b6bb3c-8ad9-49d3-afd1-1e5316ebb35f",
+         "tenant": "IQUITY",
+         "productName": "Edge Manager",
+         "redisConfig": {
+          "host":"cde-redis-cluster.utb9aj.0001.usw2.cache.amazonaws.com",
+          "port":6379
+          },
+         "multiInstance":false,
+         "microappServices":[
+         {
+          "id":"edgemanager",
+          "name":"Edge Manager",
+          "link":"/edgemanager/",
+          "icon":"dashboard",
+          "host":"http://web-app-service.default",
+          "path":"/edgemanager",
+          "template":"/index.html",
+          "navService":"/nav",
+          "default":true,
+          "visibility": true
+         },
+         {
+          "id": "orchestrationai",
+          "name": "Orchestration AI",
+          "link": "/orchestrationai/",
+          "icon": "analytics",
+          "host": "http://orchweb-app-service.default",
+          "path": "/orchestrationai",
+          "template": "/index.html",
+          "navService": "/nav",
+          "default": false,
+          "visibility": true
+           }
+          ]
+        }
+      ]
+kind: ConfigMap
+metadata:
+  name: app-config

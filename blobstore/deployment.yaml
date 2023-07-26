@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dep-blob-store
+  labels:
+    app: dep-blob-store
+  annotations:
+    configmap.reloader.stakater.com/reload: "blob-postgres-config"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dep-blob-store
+  template:
+    metadata:
+      labels:
+        app: dep-blob-store
+    spec:
+      imagePullSecrets:
+        - name: cde-reg-credentials
+      containers:
+        - name: dep-blob-store
+          image: ghcr.io/bh-ent-tech/blobstore:v1.0.0.34
+          env:
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: blob-postgres-config
+                key: DB_HOST
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: blob-postgres-config
+                key: DB_PORT
+          - name: DB_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                name: blob-postgres-config
+                key: DB_USERNAME
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: blob-pgdb-key
+                key: DB_PASSWORD
+          - name: DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: blob-postgres-config
+                key: DB_NAME
+          - name: SSU
+            value: "https://keycloak.np-0000177.npause1.bakerhughes.com/auth"
+          - name: CLIENT_ID
+            value: "appnotification"
+          - name: CLIENT_SECRET
+            value: "pfMWN1NRPRNA5csp0hMzubzQ70arHUII"
+          - name: RBAC_SUPPORT
+            value: "disabled"
+          - name: ABAC_SUPPORT
+            value: "enabled"
+          - name: NODE_TLS_REJECT_UNAUTHORIZED
+            value: "0"
+          - name: STORAGE_BUCKETNAME
+            value: "ofe-fs-dev-s3-bucket"
+          - name: "STORAGE_TYPE"
+            value: "local"
+          - name: NODE_ENV
+            value: "dev"
+          - name: NEW_RELIC_APP_NAME
+            value: "BlobStore-FS-DEV"
+          - name: FILE_PART_SIZE
+            value: "110"
+          - name: NEW_RELIC_LICENSE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: newrelic-license
+                key: NEW_RELIC_LICENSE_KEY
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "1024Mi"
+              cpu: "500m"
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 8040
+              name: blob-store-app
+            - containerPort: 5432
+              name: postgres-db

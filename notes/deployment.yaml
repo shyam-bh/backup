@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dep-notes-service
+  labels:
+    app: dep-notes-service
+spec:
+  replicas: 2
+  selector: 
+    matchLabels:
+     app: dep-notes-service
+  template:
+    metadata:
+      labels:
+        app: dep-notes-service
+    spec:
+      imagePullSecrets:
+        - name: cde-reg-credentials
+      containers:
+        - name: dep-notes-service
+          image: ghcr.io/bh-ent-tech/notes:v1.0.0.72
+          env:
+          - name: dep-notes-service
+            value: "http://svc-bhsecurityservice:80"
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: notes-postgres-config
+                key: DB_HOST
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: notes-postgres-config
+                key: DB_PORT
+          - name: DB_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                name: notes-postgres-config
+                key: DB_USERNAME
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: notes-postgresdb-key
+                key: DB_PASSWORD
+          - name: DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: notes-postgres-config
+                key: DB_NAME
+          - name: NEW_RELIC_APP_NAME
+            value: "Annotations-FS-QA"
+          - name: NEW_RELIC_LICENSE_KEY
+            valueFrom:
+              secretKeyRef:
+                name: newrelic-license
+                key: NEW_RELIC_LICENSE_KEY
+#           - name: SSU
+#             value: "http://svc-bhsecurityservice:80"
+          - name: SSU
+            value: "https://keycloak.np-0000177.npause1.bakerhughes.com/auth"
+          - name: CLIENT_ID
+            value: "appnotification"
+          - name: CLIENT_SECRET
+            value: "pfMWN1NRPRNA5csp0hMzubzQ70arHUII"
+          - name: RBAC_SUPPORT
+            value: "disabled"
+          - name: ABAC_SUPPORT
+            value: "enabled"
+          - name: NODE_TLS_REJECT_UNAUTHORIZED
+            value: "0"
+#           - name: ORIGIN_URL8s9jtma1
+#             value: "https://fs-dev.np-0000177.npause1.bakerhughes.com/notes"
+#           - name: EXPOSE_HEADERS8s9jtma1
+#             value: "*"
+#           - name: MAX_AGE_IN_SECS8s9jtma1
+#             value: "1200"
+#           - name: HSTS_IN_DAYS
+#             value: "365"
+          - name: NODE_ENV
+            value: "development"
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "1024Mi"
+              cpu: "500m"
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 3000
+              name: notes-app
+            - containerPort: 5432
+              name: postgres-db
+          # livenessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: {{ .Values.service.internalPort }}
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: {{ .Values.service.internalPort }}

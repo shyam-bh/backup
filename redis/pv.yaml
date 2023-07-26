@@ -1,0 +1,29 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+ name: redis-data
+ labels:
+  type: local
+  app: redis
+spec:
+ storageClassName: aws-efs
+ capacity:
+  storage: 1Gi
+ accessModes:
+  - ReadWriteOnce
+ hostPath:
+  path: "/root/efs-mount-point/redis-data"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+ name: redis-data-claim
+ labels:
+  app: redis
+spec:
+ storageClassName: aws-efs
+ accessModes:
+  - ReadWriteOnce
+ resources:
+  requests:
+   storage: 1Gi

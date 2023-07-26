@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    configmap.reloader.stakater.com/reload: "lci-svc-config"
+  name: dep-fastlci-svc
+  labels:
+    app: dep-fastlci-svc
+spec:
+  replicas: 1
+  selector:
+   matchLabels:
+    app: dep-fastlci-svc
+  template:
+    metadata:
+      labels:
+        app: dep-fastlci-svc
+    spec:
+      containers:
+        - name: dep-fastlci-svc
+          image: fastlca-registry-dev.np-0000189.npause1.bakerhughes.com/fast-lci-svc:v0.0.29.0
+          env:
+          - name: TENANT_INFO
+            valueFrom:
+              configMapKeyRef:
+                name: lci-svc-config
+                key: lci-svc.conf
+          - name: SSUDHHPJBBKCNS7CTB3CM
+            value: "http://100.65.13.1:32000/auth"
+          - name: client_idDHHPJBBKCNS7CTB3CM
+            value: "lci-service"
+          - name: client_secretDHHPJBBKCNS7CTB3CM
+            value: "4a1943d2-086c-4209-ae03-40d42cd3b650"
+          - name: PG_CREDDHHPJBBKCNS7CTB3CM
+            value: "postgresql://lcidbdev:lcidb$dev123@faspgd03.cslxdto2ana3.us-east-1.rds.amazonaws.com:5432/lcidbdev"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 7000
+              name: fastlci-svc
+            - containerPort: 5432
+              name: fastlci-svc-db
+      imagePullSecrets:
+        - name: fastlca-dev-cred

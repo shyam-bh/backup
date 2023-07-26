@@ -1,0 +1,82 @@
+pipeline {
+    agent {
+    //label '10.229.6.80'
+    label 'docker'
+    } 
+    options {
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '30'))
+  } 
+
+    parameters {
+        string(name: 'IMAGE_TAG', defaultValue: '', description: 'provide the image tag to be deployed')
+        string(name: 'DIR_NAME', defaultValue: 'DEV', description: 'provide the target directory path where need to update image version dev or qa etc.')
+        //string(name: 'IMAGE_NAME', defaultValue: '', description: 'provide the image name to be deployed')
+       choice(name: 'IMAGE_NAME', choices: ['cde-app-shell','bh-security-service','blobstore','ogd-cf-blob-storage-service','bh-edge-orchestration-command-queue','ogd-cf-data-collector-dep-service','ogd-cf-data-collector-manager','ogd-cf-dbis','ogd-cf-dcm-scheduler','repostiory-upload','bh-edge-orchestration-flow-translator','ogd-cf-gateway-service','hawkbit-update-server','keycloak','bh-edge-orchestration-dbis','orchestration-app','ogd-cf-ota-manager','pipeline-manager','solace-pubsub-standard','ogd-cf-token-generator-service','ogd-cf-user-authentication-authorization','ogd-edge-pipeline-management-web','nginx','pgadmin4','redis'] , description: 'provide the image name to be deployed')
+         string(name: 'DEVREGISTRY', defaultValue: 'e2c-registry-dev.np-0000173.npause1.bakerhughes.com', description: 'provide the image registry name')
+    }
+
+    // define the credentials to be used according to the project requirements in environment.
+    environment {
+        cdecred = credentials('bh-ent-tech-ghcr-token')
+        gitcred = credentials('NEW_BH_GIT')
+        devcred = credentials('e2c-dev-registry')
+            devcred = credentials('e2c-dev-registry')
+        devregistry = 'e2c-registry-dev.np-0000173.npause1.bakerhughes.com'
+
+    }
+    stages{
+        stage('Check prerequisites'){
+            steps{
+                script{
+                    cleanWs()
+                    if ("${params.IMAGE_NAME}" == ''){
+                    currentBuild.result = 'ABORTED'
+                    error('Image name not provided !!!')
+                    }
+                }
+            }
+        }
+         /*stage('Docker Image pull/push')
+        {
+            steps{
+              sh '''
+              echo $devregistry
+              docker login --username ${devcred_USR} ${devregistry} --password ${devcred_PSW}
+                docker pull ${devregistry}/${IMAGE_NAME}:${IMAGE_TAG}
+                docker logout
+
+                docker tag $devregistry/$IMAGE_NAME:$IMAGE_TAG ${PERFREGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+
+                docker login --username ${perfcred_USR} ${PERFREGISTRY} --password ${perfcred_PSW}
+                docker push ${PERFREGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                docker logout
+                '''
+            }*/
+        }    
+        stage("Update manifest files")
+        {
+            steps{
+                git branch: "main" , credentialsId: 'NEW_BH_GIT', url: "https://github.com/bh-ent-tech/E2C-bh-argocd.git"
+                echo "Image Version $IMAGE_TAG of Image $IMAGE_NAME will be updated in deployment.yaml of DIR $DIR_NAME"
+                sh '''
+        IMAGE_BUILD=${DEVREGISTRY}/${IMAGE_NAME}
+                cd $DIR_NAME/$IMAGE_NAME
+                cat deployment.yaml | grep -i "image"
+                sed -i "s|image: .*$|image: ${IMAGE_BUILD}:${IMAGE_TAG}|" deployment.yaml  
+
+                cat deployment.yaml | grep -i "image" 
+                git config --local user.name "Jenkins"
+                git config --local credential.helper "!f() { echo username=\$gitcred_USR; echo password="\$gitcred_PSW"; }; f"
+                git add deployment.yaml
+                git commit -m "Updated deployment.yaml with $IMAGE_NAME$IMAGE_TAG" || true
+                git push origin main 
+                '''
+            }
+        } }
+        post { 
+        always {
+          cleanWs()
+          }        
+    }
+}  

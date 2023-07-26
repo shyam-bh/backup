@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata: 
+  name: gateway-service-service
+spec: 
+  ports: 
+    - 
+      name: gateway-service-service
+      port: 80
+      protocol: TCP
+      targetPort: 8084
+      nodePort: 31792
+  selector: 
+    app: gateway-service
+  type: NodePort

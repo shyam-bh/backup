@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    configmap.reloader.stakater.com/reload: "app-config,app-shell-bh-ca-bundle"
+  name: dep-app-shell
+  labels:
+    app: dep-app-shell
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dep-app-shell
+  template:
+    metadata:
+      labels:
+        app: dep-app-shell
+    spec:
+      imagePullSecrets:
+         - name: e2c-dev-cred
+      containers:
+        - name: dep-app-shell
+          image: e2c-registry-dev.np-0000173.npause1.bakerhughes.com/cde-app-shell:v0.0.1.145
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: 5678 
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 1
+          livenessProbe:
+            httpGet:
+              path: /health/liveliness
+              port: 5678 
+            initialDelaySeconds: 300
+            periodSeconds: 10
+            timeoutSeconds: 1
+          env:
+          - name: NODE_EXTRA_CA_CERTS
+            value: /etc/ssl/certs/ca-bundle.crt 
+          - name: SSU
+            value: "http://svc-bhiauth-service:80"
+          - name: TENANT_INFO
+            valueFrom:
+              configMapKeyRef:
+                name: app-config
+                key: app-shell.conf
+          volumeMounts:
+          - name: ca-bundle
+            mountPath: /etc/ssl/certs/ca-bundle.crt
+            subPath: ca-bundle.crt
+            readOnly: false       
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+      volumes:
+      - name: ca-bundle
+        configMap:
+          name: app-shell-bh-ca-bundle

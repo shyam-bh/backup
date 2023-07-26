@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: object-store-configmap-rbac
+data: 
+  rbac.conf: |
+    {
+                           "policy-enforcer": {
+                             "enforcement-mode": "ENFORCING",
+                             "paths": [
+                                 {
+                                     "path": "/v2/object/search",
+                                     "methods": [
+                                            {
+                                                 "method": "GET",
+                                                 "scopes": ["search_object_scope"]  
+                                            }
+                                     ]
+                                 },
+                                 {
+                                     "path": "/v2/object/*",
+                                     "methods": [
+                                            {
+                                                 "method": "PUT",
+                                                 "scopes": ["upload_scope"]  
+                                            },
+                                            {
+                                                 "method": "GET",
+                                                 "scopes": ["read_scope"]  
+                                            },
+                                            {
+                                                 "method": "DELETE",
+                                                 "scopes": ["delete_scope"]  
+                                            },
+                                            {
+                                                 "method": "PATCH",
+                                                 "scopes": ["patch_tag_scope"]  
+                                            },
+                                     ]
+                                 }
+                               ]
+                           }
+       }

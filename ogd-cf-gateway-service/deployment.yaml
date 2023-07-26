@@ -1,0 +1,351 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata: 
+  annotations:
+    configmap.reloader.stakater.com/reload: "gateway-service-configmap"
+  name: dep-gateway-service
+  labels: 
+    app: gateway-service
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels: 
+      app: gateway-service
+  template: 
+    metadata: 
+      labels: 
+        app: gateway-service
+    spec:
+      imagePullSecrets:
+         - name: e2c-dev-cred
+      containers: 
+        - 
+          image: e2c-registry-dev.np-0000173.npause1.bakerhughes.com/ogd-cf-gateway-service:v1.2.0.860
+          name: gateway-service
+          ports: 
+            - 
+              containerPort: 8084
+          env: 
+            - 
+              name: REDIS_PORT
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: REDIS_PORT
+            - 
+              name: GWS_COMMAND_HISTORY_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_COMMAND_HISTORY_URL
+            - 
+              name: GWS_COMMAND_STATUS_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_COMMAND_STATUS_URL
+            - 
+              name: GWS_HEALTH_STATS_INFO
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_HEALTH_STATS_INFO
+            - 
+              name: GWS_HEALTH_STATS_SUMM
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_HEALTH_STATS_SUMM
+            - 
+              name: REDIS_HOST
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: REDIS_HOST
+            - 
+              name: GWS_DEVICE_REGISTRATION_STATUS
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_DEVICE_REGISTRATION_STATUS
+            - 
+              name: DOCKER_REGISTRY_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: DOCKER_REGISTRY_URL
+            - 
+              name: DOCKER_REPOSITORY_IMAGE_PREFIX
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: DOCKER_REPOSITORY_IMAGE_PREFIX
+            - 
+              name: DOCKER_REGISTRY_IMAGES_ENDPOINT
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: DOCKER_REGISTRY_IMAGES_ENDPOINT
+            - 
+
+              name: GWS_DEVICE_DELETE_GATEWAY
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_DEVICE_DELETE_GATEWAY
+            -
+              name: GWS_CONTAINER_HEALTH_STATS
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_CONTAINER_HEALTH_STATS
+                  
+            -
+             
+              name: GWS_DEVICE_CREATE_GATEWAY
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_DEVICE_CREATE_GATEWAY
+                  
+            -
+             
+              name: GWS_GET_DEVICE_LIST
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_GET_DEVICE_LIST
+                  
+            -
+             
+              name: GWS_GET_APPROVED_DEVICE
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_GET_APPROVED_DEVICE 
+                  
+            -
+             
+              name: GWS_DEVICE_REGISTRATION_STATUS_V2
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_DEVICE_REGISTRATION_STATUS_V2 
+                  
+            -
+             
+              name: GWS_GROUP_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_GROUP_URL
+                  
+            -
+             
+              name: GWS_GROUP_DELETE_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_GROUP_DELETE_URL               
+            -
+             
+              name: GWS_GROUP_GATEWAY_PATCH
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_GROUP_GATEWAY_PATCH                  
+            -
+              name: EXLUDE_URL_PATTERN
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: EXLUDE_URL_PATTERN
+            -
+              name: CLIENT_ID
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: CLIENT_ID
+            -
+              name: CLIENT_SECRET
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: CLIENT_SECRET
+            -
+              name: GWS_EDGE_DETAILS_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_EDGE_DETAILS_URL
+            -
+              name: GWS_EDGE_DELETE_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_EDGE_DELETE_URL
+            -
+              name: GWS_EDGE_MAKE_ADD_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_EDGE_MAKE_ADD_URL
+                  
+            -
+              name: GWS_DEVICE_STATUS_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_DEVICE_STATUS_URL
+                  
+            -
+              name: GWS_APPROVED_GATEWAY_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_APPROVED_GATEWAY_URL
+                  
+            -
+              name: GWS_REJECTED_GATEWAY_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_REJECTED_GATEWAY_URL
+                  
+            -
+              name: GWS_CREATED_GATEWAY_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_CREATED_GATEWAY_URL
+                  
+                  
+            -
+              name: GWS_CREATED_GROUP_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_CREATED_GROUP_URL
+                  
+            -
+              name: GWS_COMMAND_HISTORY_EVENT
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_COMMAND_HISTORY_EVENT
+                  
+            -
+              name: BLOB_STORAGE_BASE_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: BLOB_STORAGE_BASE_URL
+                  
+            -
+              name: OTA_SERVICE_BASE_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: OTA_SERVICE_BASE_URL
+                  
+            -
+              name: DBIS_BASE_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: DBIS_BASE_URL
+                  
+            -
+              name: PMS_BASE_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: PMS_BASE_URL
+                  
+            -
+              name: TMS_BASE_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: TMS_BASE_URL
+                  
+            -
+              name: OTA_COMMAND_TIMEOUT_IN_MINS
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: OTA_COMMAND_TIMEOUT_IN_MINS
+            - 
+              name: LOGGING_LEVEL
+              valueFrom: 
+                configMapKeyRef: 
+                  key: LOGGING_LEVEL
+                  name: gateway-service-configmap
+            -
+              name: INSTALL_IMAGE_TIMEOUT_IN_MINS
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: INSTALL_IMAGE_TIMEOUT_IN_MINS
+            -
+              name: KEYCLOAK_REALM
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: KEYCLOAK_REALM
+            -
+              name: KEYCLOAK_SERVER_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: KEYCLOAK_SERVER_URL
+            -
+              name: KEYCLOAK_SSL_REQUIRED
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: KEYCLOAK_SSL_REQUIRED
+            -
+              name: SS_USER_INFO_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: SS_USER_INFO_URL
+            -
+              name: DEFAULT_CPU_MAX_LIMIT_PERCENTAGE
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: DEFAULT_CPU_MAX_LIMIT_PERCENTAGE 
+            -
+              name: DEFAULT_RAM_MAX_LIMIT_PERCENTAGE
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: DEFAULT_RAM_MAX_LIMIT_PERCENTAGE  
+            -
+              name: GWS_ACTIVATE_DEVICE_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_ACTIVATE_DEVICE_URL  
+            -
+              name: DEVICE_POLLING_CONFIG_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: DEVICE_POLLING_CONFIG_URL
+            -
+              name: GWS_TIME_TO_ACTIVE_URL
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: GWS_TIME_TO_ACTIVE_URL
+            -
+              name: TENANT_CONFIG_DETAILS
+              valueFrom: 
+                configMapKeyRef: 
+                  name: gateway-service-configmap
+                  key: TENANT_CONFIG_DETAILS
+#      imagePullSecrets: 
+#        - name: regcred

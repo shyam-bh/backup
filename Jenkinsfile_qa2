@@ -1,0 +1,82 @@
+pipeline {
+    agent {
+    //label '10.229.6.80'
+    label 'e2c'
+    } 
+    options {
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '30'))
+  } 
+
+    parameters {
+        string(name: 'IMAGE_TAG', defaultValue: '', description: 'provide the image tag to be deployed')
+        string(name: 'DIR_NAME', defaultValue: 'QA', description: 'provide the target directory path where need to update image version dev or qa etc.')
+        //string(name: 'IMAGE_NAME', defaultValue: '', description: 'provide the image name to be deployed')
+       choice(name: 'IMAGE_NAME', choices: ['bh-user-mgmt','cde-app-shell','cde-appshellusermngt','bh-security-service','fast-lca-app','fast-lca-beta','fast-lca-svc','nginx','fast-lca-svc','fast-lci-svc','fastlca-svc-v2','fast-lci-app','keycloakb','pgadmin4','fastlca-app-v2','fastlca-strapi-svc-v2'] , description: 'provide the image name to be deployed')
+         string(name: 'QA2REGISTRY', defaultValue: 'fastlca-registry-qa2.np-0000191.npause1.bakerhughes.com', description: 'provide the image registry name')
+    }
+    
+    // define the credentials to be used according to the project requirements in environment.
+    environment {
+        cdecred = credentials('bh-ent-tech-ghcr-token')
+        gitcred = credentials('NEW_BH_GIT')
+        qa2cred = credentials('fastlca-QA2-registry')
+        devcred = credentials('fastlca-dev-registry')
+        devregistry = 'fastlca-registry-dev.np-0000189.npause1.bakerhughes.com'
+
+    }
+    stages{
+        stage('Check prerequisites'){
+            steps{
+                script{
+                    cleanWs()
+                    if ("${params.IMAGE_NAME}" == ''){
+                    currentBuild.result = 'ABORTED'
+                    error('Image name not provided !!!')
+                    }
+                }
+            }
+        }
+          stage('Docker Image pull/push')
+        {
+            steps{
+              sh '''
+              echo $devregistry
+              docker login --username ${devcred_USR} ${devregistry} --password ${devcred_PSW}
+                docker pull ${devregistry}/${IMAGE_NAME}:${IMAGE_TAG}
+                docker logout
+
+                docker tag $devregistry/$IMAGE_NAME:$IMAGE_TAG ${QA2REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                
+                docker login --username ${qa2cred_USR} ${QA2REGISTRY} --password ${qa2cred_PSW}
+                docker push ${QA2REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}
+                docker logout
+                '''
+            }
+        }   
+        stage("Update manifest files")
+        {
+            steps{
+                git branch: "main" , credentialsId: 'NEW_BH_GIT', url: "https://github.com/bh-ent-tech/Fastlca_deployment-files.git"
+                echo "Image Version $IMAGE_TAG of Image $IMAGE_NAME will be updated in deployment.yaml of DIR $DIR_NAME"
+                sh '''
+        IMAGE_BUILD=${QA2REGISTRY}/${IMAGE_NAME}
+                cd $DIR_NAME/$IMAGE_NAME
+                cat deployment.yaml | grep -i "image"
+                sed -i "s|image: .*$|image: ${IMAGE_BUILD}:${IMAGE_TAG}|" deployment.yaml  
+                 
+                cat deployment.yaml | grep -i "image" 
+                git config --local user.name "Jenkins"
+                git config --local credential.helper "!f() { echo username=\$gitcred_USR; echo password="\$gitcred_PSW"; }; f"
+                git add deployment.yaml
+                git commit -m "Updated deployment.yaml with $IMAGE_NAME$IMAGE_TAG" || true
+                git push origin main
+                '''
+            }
+        } }
+        post { 
+        always {
+          cleanWs()
+          }        
+    }
+}  

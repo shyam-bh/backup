@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dep-security-adapter
+  labels:
+    app: dep-security-adapter
+  annotations:
+    configmap.reloader.stakater.com/reload: "asset-security-adapter-config"
+spec:
+  replicas: 2
+  selector: 
+    matchLabels:
+     app: dep-security-adapter
+  template:
+    metadata:
+      labels:
+        app:  dep-security-adapter
+    spec:
+      imagePullSecrets:
+        - name: cde-reg-credentials
+      containers:
+        - name: dep-security-adapter
+          image: ghcr.io/bh-ent-tech/asset-security-adapter:129
+          env:
+          - name: SECURITY_CONFIGURATION
+            value: '{"AuthServerUrl":"http:\/\/100.65.79.254:32000\/auth\/","Audience":"1cbjah3es4e46mfpk9fmd5lfif","RbacEnable":false,"AutomaticCertificateRefreshIntervalInMinute":5,"RequireHttps":true,"ExcludeOptions":null,"IncludeOptions":[{"Path":"/home/get","Methods":[{"Method":"GET","Scopes":["#sample-app-get"]}]},{"Path":"/home/put","Methods":[{"Method":"PUT","Scopes":["#sample-app-put"]}]},{"Path":"/home/post","Methods":[{"Method":"POST","Scopes":["#sample-app-post"]}]},{"Path":"/home/patch","Methods":[{"Method":"PATCH","Scopes":["#sample-app-patch"]}]},{"Path":"/home/delete","Methods":[{"Method":"DELETE","Scopes":["#sample-app-delete"]}]}]}'
+          volumeMounts:
+            - mountPath: /etc/ssl/certs/ca-bundle-dfsc.crt
+              subPath: ca-bundle-dfsc.crt
+              name: ca-bundle-dfsc
+              readOnly: false     
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+              name: adapter
+      volumes:
+        - configMap:
+            name: ca-bundle-dfsc
+          name: ca-bundle-dfsc

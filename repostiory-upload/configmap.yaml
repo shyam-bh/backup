@@ -1,0 +1,39 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: docker-upload-service-configmap
+data:
+ ECR_REPO_URL: 280307018626.dkr.ecr.us-east-1.amazonaws.com/e2cdev
+ ECR_TOKEN_URL: http://token-generator-service/edge-device/registry/token
+ DEVICE_ID: c664f4ff-32f5-4c5e-8771-dd9d3d15f054
+ DEPLOYMENT_ID: pcs-sdc--9dabfee3-94bf-4bc4-9108-d8ca0fea782d
+ TOKEN_URL: http://uaa-service/edge-device/v2/uaa/auth/token
+ DOCKER_ENGINE_HOST_AND_PORT: 10.77.16.89:6724
+ REDIS_HOST: redis.default
+ REDIS_PORT: "6379"
+ REDIS_PASSWORD: ""
+ IMAGE_SCAN_URL: http://token-generator-service/v1/aws-ecr/images/scan
+ IMAGE_SCAN_FINDINGS_URL: http://token-generator-service/v1/aws-ecr/images/scan/result?imageTagName={imageTagName}
+ IMAGE_DELETE_URL: http://token-generator-service/v1/aws-ecr/images/remove?imageTagName={imageTagName}
+ IMAGE_LIST_URL: http://token-generator-service/v1/aws-ecr/images
+ DBIS_STATUS_SAVE_URL: http://orchestration-dbis-service.default/orchestration-dbis/docker-upload-command-status/save
+ DBIS_STATUS_FETCH_URL: http://orchestration-dbis-service.default/orchestration-dbis/docker-upload-command-status/fetch/%s
+ DBIS_STATUS_FETCH_ALL_URL: http://orchestration-dbis-service.default/orchestration-dbis/docker-upload-command-status/fetchAll?asc=%b
+ DBIS_STATUS_UPDATE_URL: http://orchestration-dbis-service.default/orchestration-dbis/docker-upload-command-status/update
+ DBIS_STATUS_DELETE_URL: http://orchestration-dbis-service.default/orchestration-dbis/docker-upload-command-status/delete/%s
+ APP_SHELL_USERNAME: dev.user@bakerhughes.com
+ APP_SHELL_PASSWORD: P@55word
+ APP_SHELL_TENANT: IQUITY
+ APP_SHELL_CLIENT_ID: e2c-client
+ APP_SHELL_GRANT_TYPE: password
+ APP_SHELL_CLIENT_SECRET: "26b6bb3c-8ad9-49d3-afd1-1e5316ebb35f"
+ APP_SHELL_URL: http://svc-bhsecurityservice/oauth2/v2/token 
+ KEYCLOAK_REALM: "IQUITY"
+ KEYCLOAK_SERVER_URL: "http://svc-keycloak/auth"
+ KEYCLOAK_SSL_REQUIRED: "external"
+ CLIENT_ID: "e2c-client"
+ CLIENT_SECRET: "26b6bb3c-8ad9-49d3-afd1-1e5316ebb35f"
+ EXCLUDE_URL_PATTERN: ""
+ UAA_CLIENT_ID: "pcs-sdc--9dabfee3-94bf-4bc4-9108-d8ca0fea782d-c664f4ff-32f5-4c5e-8771-dd9d3d15f054"
+ UAA_CLIENT_SECRET: "RuWt1fzwQyct5xby9Im2qY97Q9995SE2KG1P4L3zcZw="
+ TENANT_CONFIG_DETAILS: '{"IQUITY":{"resource":"e2c-client","credentials":{"secret":"26b6bb3c-8ad9-49d3-afd1-1e5316ebb35f"}}}'

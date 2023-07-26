@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: case-alert2-pg-config
+data:
+  DB_HOST: "fsdpgd05.c6ooanpu2tgf.us-east-1.rds.amazonaws.com"
+  DB_PORT: "5432"
+  DB_USERNAME: "sqladmin"
+  DB_NAME: "casefsdpgd05"
+  DB_DEFAULT: "postgres"

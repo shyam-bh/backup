@@ -1,0 +1,631 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: case-alerts2-configmap  
+data: 
+  initial-types.json: |
+      [
+          {
+            "tenant" : "SPARQ-DEV",
+            "initialdata" : [
+                {
+                "id": "system1alarmevent11101",
+                "name": "system1alarmevent11101",
+                "tags": [
+                    "system1alarmevent"
+                ],
+                "version": "1.0",
+                "fields": [
+                    {
+                        "name": "enteredtimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "eventid",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "eventtype",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "severity",
+                        "datatype": "smallint"
+                    },
+                    {
+                        "name": "eventcategory",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "eventtypeseveritygotworse",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "ackedby",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "instrumentationpath",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "eventsequencenumber",
+                        "datatype": "bigint"
+                    },
+                    {
+                        "name": "deviceid",
+                        "datatype": "uuid"
+                    },
+                    {
+                        "name": "eventackdhpid",
+                        "datatype": "uuid"
+                    },
+                    {
+                        "name": "acktimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "lefttimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "statusbit",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "isactive",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "isacknowledgeable",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "servertimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "writtentimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "sourcecomputername",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "pointid",
+                        "datatype": "uuid"
+                    },
+                    {
+                        "name": "asset",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "measurement",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "point",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "setpoint1",
+                        "datatype": "double precision"
+                    },
+                    {
+                        "name": "setpoint2",
+                        "datatype": "double precision"
+                    },
+                    {
+                        "name": "triggervalue",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "stateid",
+                        "datatype": "integer"
+                    },
+                    {
+                        "name": "statename",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "isautoshelved",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "ismanualshelved",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "alarmstatus",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "latchresetby",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "groupid",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "nodeid",
+                        "datatype": "uuid"
+                    }
+                ],
+                "identity": "eventid",
+                "groupingKey": "groupid",
+                "partitionKey": "enteredtimestamp",
+                "partitionDuration": "Y",
+                "fetchCriteria": [
+                    {
+                        "name": "fc_servertimestamp",
+                        "fields": [
+                            "servertimestamp"
+                        ]
+                    },
+                    {
+                        "name": "fc_enterlefttimestamp",
+                        "fields": [
+                            "enteredtimestamp",
+                            "lefttimestamp",
+                            "pointid"
+                        ]
+                    },
+                    {
+                        "name": "fc_entertimewithpointid",
+                        "fields": [
+                            "enteredtimestamp",
+                            "pointid"
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "system1systemevent2201",
+                "name": "system1systemevent2201",
+                "tags": [
+                    "system1systemevent"
+                ],
+                "version": "1.0",
+                "fields": [
+                    {
+                        "name": "enteredtimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "eventid",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "eventtype",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "severity",
+                        "datatype": "smallint"
+                    },
+                    {
+                        "name": "eventcategory",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "eventtypeseveritygotworse",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "ackedby",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "instrumentationpath",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "eventsequencenumber",
+                        "datatype": "bigint"
+                    },
+                    {
+                        "name": "deviceid",
+                        "datatype": "uuid"
+                    },
+                    {
+                        "name": "eventackdhpid",
+                        "datatype": "uuid"
+                    },
+                    {
+                        "name": "acktimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "lefttimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "statusbit",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "isactive",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "isacknowledgeable",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "servertimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "writtentimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "sourcecomputername",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "username",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "istraceable",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "supportingevidence",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "nodeid",
+                        "datatype": "uuid"
+                    },
+                    {
+                        "name": "groupid",
+                        "datatype": "text"
+                    }
+                ],
+                "identity": "eventid",
+                "groupingKey": "groupid",
+                "partitionKey": "enteredtimestamp",
+                "partitionDuration": "Y",
+                "fetchCriteria": [
+                    {
+                        "name": "fc_servertimestamp",
+                        "fields": [
+                            "servertimestamp"
+                        ]
+                    },
+                    {
+                        "name": "fc_enterlefttimestamp",
+                        "fields": [
+                            "enteredtimestamp",
+                            "lefttimestamp",
+                            "nodeid"
+                        ]
+                    },
+                    {
+                        "name": "fc_entertimewithpointid",
+                        "fields": [
+                            "enteredtimestamp",
+                            "nodeid"
+                       ]
+                    }
+                 ]
+              }
+            ]
+          },
+          {
+            "tenant" : "SPARQ-DEV",
+            "initialdata" : [
+            {
+                "id": "system1alarmevent111",
+                "name": "system1alarmevent111",
+                "tags": [
+                    "system1alarmevent"
+                ],
+                "version": "1.0",
+                "fields": [
+                    {
+                        "name": "enteredtimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "eventid",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "eventtype",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "severity",
+                        "datatype": "smallint"
+                    },
+                    {
+                        "name": "eventcategory",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "eventtypeseveritygotworse",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "ackedby",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "instrumentationpath",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "eventsequencenumber",
+                        "datatype": "bigint"
+                    },
+                    {
+                        "name": "deviceid",
+                        "datatype": "uuid"
+                    },
+                    {
+                        "name": "eventackdhpid",
+                        "datatype": "uuid"
+                    },
+                    {
+                        "name": "acktimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "lefttimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "statusbit",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "isactive",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "isacknowledgeable",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "servertimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "writtentimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "sourcecomputername",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "pointid",
+                        "datatype": "uuid"
+                    },
+                    {
+                        "name": "asset",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "measurement",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "point",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "setpoint1",
+                        "datatype": "double precision"
+                    },
+                    {
+                        "name": "setpoint2",
+                        "datatype": "double precision"
+                    },
+                    {
+                        "name": "triggervalue",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "stateid",
+                        "datatype": "integer"
+                    },
+                    {
+                        "name": "statename",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "isautoshelved",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "ismanualshelved",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "alarmstatus",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "latchresetby",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "groupid",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "nodeid",
+                        "datatype": "uuid"
+                    }
+                ],
+                "identity": "eventid",
+                "groupingKey": "groupid",
+                "partitionKey": "enteredtimestamp",
+                "partitionDuration": "Y",
+                "fetchCriteria": [
+                    {
+                        "name": "fc_servertimestamp",
+                        "fields": [
+                            "servertimestamp"
+                        ]
+                    },
+                    {
+                        "name": "fc_enterlefttimestamp",
+                        "fields": [
+                            "enteredtimestamp",
+                            "lefttimestamp",
+                            "pointid"
+                        ]
+                    },
+                    {
+                        "name": "fc_entertimewithpointid",
+                        "fields": [
+                            "enteredtimestamp",
+                            "pointid"
+                        ]
+                    }
+                ]
+                },
+              {
+                "id": "System1MonthlyPartition",
+                "name": "system1systemevent220",
+                "tags": [
+                    "system1systemevent"
+                ],
+                "version": "1.0",
+                "fields": [
+                    {
+                        "name": "enteredtimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "eventid",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "eventtype",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "severity",
+                        "datatype": "smallint"
+                    },
+                    {
+                        "name": "eventcategory",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "eventtypeseveritygotworse",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "ackedby",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "instrumentationpath",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "eventsequencenumber",
+                        "datatype": "bigint"
+                    },
+                    {
+                        "name": "deviceid",
+                        "datatype": "uuid"
+                    },
+                    {
+                        "name": "eventackdhpid",
+                        "datatype": "uuid"
+                    },
+                    {
+                        "name": "acktimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "lefttimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "statusbit",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "isactive",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "isacknowledgeable",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "servertimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "writtentimestamp",
+                        "datatype": "timestamp"
+                    },
+                    {
+                        "name": "sourcecomputername",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "username",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "istraceable",
+                        "datatype": "boolean"
+                    },
+                    {
+                        "name": "supportingevidence",
+                        "datatype": "text"
+                    },
+                    {
+                        "name": "nodeid",
+                        "datatype": "uuid"
+                    },
+                    {
+                        "name": "groupid",
+                        "datatype": "text"
+                    }
+                ],
+                "identity": "eventid",
+                "groupingKey": "groupid",
+                "partitionKey": "enteredtimestamp",
+                "partitionDuration": "M",
+                "fetchCriteria": [
+                    {
+                        "name": "fc_servertimestamp",
+                        "fields": [
+                            "servertimestamp"
+                        ]
+                    },
+                    {
+                        "name": "fc_enterlefttimestamp",
+                        "fields": [
+                            "enteredtimestamp",
+                            "lefttimestamp",
+                            "nodeid"
+                        ]
+                    },
+                    {
+                        "name": "fc_entertimewithpointid",
+                        "fields": [
+                            "enteredtimestamp",
+                            "nodeid"
+                       ]
+                    }
+                 ]
+              }
+            ]
+          }
+        
+        ]

@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    configmap.reloader.stakater.com/reload: "postgres-config"
+  name: dep-keycloak-svc
+  labels:
+    app: dep-keycloak-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dep-keycloak-svc
+  template:
+    metadata:
+      labels:
+        app: dep-keycloak-svc
+    spec:
+      containers:
+        - name: dep-keycloak-svc
+          image: e2c-registry-dev.np-0000173.npause1.bakerhughes.com/jboss/keycloak:15
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+          - name: KEYCLOAK_USER
+            value: "admin"
+          - name: KEYCLOAK_PASSWORD
+            value: "GE1234ge#4321"
+          - name: PROXY_ADDRESS_FORWARDING
+            value: "true"
+          - name: DB_VENDOR
+            value: "postgres"
+          - name: DB_SCHEMA
+            value: "keycloak_new"
+          - name: DB_ADDR
+            valueFrom:
+              configMapKeyRef:
+                name: postgres-config
+                key: DB_HOST
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: postgres-config
+                key: DB_PORT
+          - name: DB_USER
+            valueFrom:
+              configMapKeyRef:
+                name: postgres-config
+                key: DB_USERNAME
+          - name: DB_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                name: postgres-config
+                key: DB_PASSWORD
+          - name: DB_DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: postgres-config
+                key: DB_NAME
+      imagePullSecrets:
+        - name: e2c-dev-cred

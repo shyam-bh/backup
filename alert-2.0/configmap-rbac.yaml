@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alert-configmap-rbac
+data: 
+  rbac.conf: |
+   [
+      {
+        "path": "/v2/types",
+        "methods": [          
+          {
+            "method": "POST",
+            "scopes": [":create-type"]
+          },  
+          {
+            "method": "GET",
+            "scopes": [":read-type"]
+          }
+        ]
+      },
+      {
+        "path": "/v2/types/:typeId",
+        "methods": [
+          {
+            "method": "GET",
+            "scopes": [":fs-read-scope"]
+          }
+        ]
+      },
+      {
+        "path": "/v2/types/:typeId/fields",
+        "methods": [
+          {
+            "method": "PATCH",
+            "scopes": []
+          }
+        ]
+      },
+      {
+        "path": "/v2/alerts",
+        "methods": [          
+          {
+            "method": "POST",
+            "scopes": [""]
+          },  
+          {
+            "method": "PATCH",
+            "scopes": [""]
+          }
+        ]
+      },
+      {
+        "path": "/v2/alerts/search",
+        "methods": [          
+          {
+            "method": "POST",
+            "scopes": [""]
+          }
+        ]
+      },
+      {
+        "path": "/v2/alerts/search/count",
+        "methods": [          
+          {
+            "method": "POST",
+            "scopes": [""]
+          }
+        ]
+      },
+      {
+        "path": "/v2/alerts/top-alert-within-subgroups",
+        "methods": [          
+          {
+            "method": "POST",
+            "scopes": [""]
+          }
+        ]
+      },
+      {
+        "path": "/v2/alerts/cleanup",
+        "methods": [          
+          {
+            "method": "DELETE",
+            "scopes": [""]
+          }
+        ]
+      },
+      {
+        "path": "/v2/register",
+        "methods": [          
+          {
+            "method": "POST",
+            "scopes": [""]
+          }
+        ]
+      }
+    ]

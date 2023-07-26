@@ -1,0 +1,302 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: default
+data:
+  nginx.conf: |
+    user nginx;
+    worker_processes auto;
+    error_log /var/log/nginx/error.log;
+    pid /run/nginx.pid;
+
+    # Load dynamic modules. See /usr/share/doc/nginx/README.dynamic.
+    include /usr/share/nginx/modules/*.conf;
+
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        #client_max_body_size 100M;
+        log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                            '$status $body_bytes_sent "$http_referer" '
+                            '"$http_user_agent" "$http_x_forwarded_for"';
+
+        access_log  /var/log/nginx/access.log  main;
+
+        sendfile            on;
+        tcp_nopush          on;
+        tcp_nodelay         on;
+        keepalive_timeout   120;
+        types_hash_max_size 2048;
+        client_max_body_size 100M;
+
+        include             /etc/nginx/mime.types;
+        default_type        application/octet-stream;
+
+        # Load modular configuration files from the /etc/nginx/conf.d directory.
+        # See http://nginx.org/en/docs/ngx_core_module.html#include
+        # for more information.
+        #include /etc/nginx/conf.d/*.conf;
+        map $http_upgrade $connection_upgrade {
+            default upgrade;
+            '' close;
+        }
+        upstream blob_store {
+            server 10.77.16.89:30840;
+        }
+        upstream blob-service {
+            server 10.77.16.89:30909;
+        }
+
+
+        upstream pipeline_manager {
+            server 10.77.16.89:31171;
+    #       server 172.17.240.56:30061;
+    #        server 172.17.70.191:30061;
+        }
+        upstream uaa-service {
+            server 10.77.16.89:31555;
+    #       server 172.17.240.56:30052;
+        #      server 172.17.70.191:30052;
+        }
+        upstream web_app {
+            server 10.77.16.89:31719;
+        #     server 172.17.240.56:30056;
+        #    server 172.17.70.191:30056;
+        }
+        upstream dbis-service-service {
+            server 10.77.16.89:31375;
+        #    server 172.17.240.56:31783;
+        #    server 172.17.70.191:31783;
+        }
+        upstream dcd-service {
+            server 10.77.16.89:32727;
+        #    server 172.17.240.56:31055;
+        #    server 172.17.70.191:31055;
+        }
+        upstream dcm-scheduler-service {
+            server 10.77.16.89:32469;
+        #    server 172.17.240.56:30356;
+        #    server 172.17.70.191:30356;
+        }
+        upstream dcm-service {
+            server 10.77.16.89:30757;
+        #    server 172.17.240.56:31298;
+        #    server 172.17.70.191:31298;
+        }
+        upstream pcus-service {
+            server 10.77.16.89:32240;
+        #    server 172.17.240.56:32240;
+        #    server 172.17.70.191:32240;
+        }
+        upstream svc-app-shell {
+            server 10.77.16.89:30309;
+    #        server 172.17.240.56:30309;
+    #        server 172.17.70.191:30309;
+        }
+        upstream token-generator-service {
+            server 10.77.16.89:31064;
+        #    server 172.17.240.56:31541;
+        #    server 172.17.70.191:31541;
+        }
+    #    upstream security-service {
+    #        server 172.22.88.210:30020;
+    #        server 172.17.240.56:30020;
+    #       server 172.17.70.191:30020;
+    #    }
+        upstream gateway-service-service {
+            server 10.77.16.89:31792;
+        #   server 172.17.240.56:31792;
+        #   server 172.17.70.191:31792;
+        }
+        upstream security {
+            server 10.77.16.89:32281;
+        }
+        upstream bh-auth {
+            server 10.77.16.89:32281;
+        }
+        upstream user-role-management-service {
+            server 10.77.16.89:30700;
+        }
+        upstream docker-upload {
+            server 10.77.16.89:30271;
+        }
+        upstream flow-translator {
+            server 10.77.16.89:30273;
+        }
+        upstream wsconnect {
+            server 10.77.16.89:30603;
+        }
+        upstream orchestration-dbis {
+            server 10.77.16.89:30171;
+        }
+        upstream ota {
+            server 10.77.16.89:30919;
+        }
+        
+        upstream solace {
+            server 10.77.16.89:30255;
+            server 10.77.16.89:30155;
+        }
+        
+        upstream connector-manager-service {
+            server 10.77.16.89:31000;
+            
+        }
+        upstream database-manager-service {
+            server 10.77.16.89:31001;
+        }
+        upstream health-scheduler-service {
+            server 10.77.16.89:30101;
+        }
+        
+
+
+        server {
+            listen       0.0.0.0:80;
+            server_name  e2c-dev.np-0000173.npause1.bakerhughes.com;
+
+
+            root         /usr/share/nginx/html;
+
+            # Load configuration files for the default server block.
+
+            include /etc/nginx/default.d/*.conf;
+
+            location /pmanager/ {
+            proxy_pass http://pipeline_manager/;
+        }
+            location /wsconnect {
+            rewrite /wsconnect/(.*)$ /$1 break;
+            proxy_pass http://wsconnect;
+
+            # websocket headers
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection $connection_upgrade;
+            proxy_read_timeout 86400;
+            proxy_http_version 1.1;
+            }
+
+            location /uaa_service/ {
+            rewrite /uaa-service/(.*)$ /$1 break;
+            proxy_pass http://uaa-service/;
+        }
+    #      location /security {
+    #        rewrite /security/(.*)$ /$1 break;
+    #        proxy_pass http://security-service;
+    #     }
+
+            location /dbis-service-service/ {
+            proxy_pass http://dbis-service-service/;
+        }
+            location /blobstore {
+            rewrite /blobstore/(.*)$ /$1 break;
+            #proxy_redirect off;
+            proxy_pass http://blob_store;
+        }
+        location /security {
+            rewrite /security/(.*)$ /$1 break;
+            proxy_pass http://security;
+        }
+    #    location /blob-service/ {
+            #rewrite /v2/blob-storage-service/(.*)$ /$1 break;
+    #     proxy_pass http://blob-service/;
+        #  }
+
+            location /dcd-service/ {
+            proxy_pass http://dcd-service/;
+        }
+
+            location /dcm-scheduler-service/ {
+            proxy_pass http://dcm-scheduler-service/;
+        }
+
+            location /dcm-service/ {
+            proxy_pass http://dcm-service/;
+        }
+
+            location /pcus-service/ {
+            proxy_pass http://pcus-service/;
+        }
+            location / {
+            #proxy_set_header Connection '';
+            #proxy_http_version 1.1;
+            #chunked_transfer_encoding off;
+            #proxy_buffering off;
+            #proxy_cache off;
+            #rewrite /svc-app-shell/(.*)$ /$1 break;
+            proxy_pass http://svc-app-shell/;
+        }
+            location /token-generator-service/ {
+            proxy_pass http://token-generator-service/;
+        }
+
+        location /gateway-service-service/ {
+            proxy_pass http://gateway-service-service/;
+        }
+        location /flow-translator {
+            proxy_pass http://flow-translator;
+        }
+        location /blob-service/ {
+            #rewrite /v2/blob-storage-service/(.*)$ /$1 break;
+            proxy_pass http://blob-service/;
+        }
+        location /socket.io/ {
+                proxy_pass http://wsconnect;
+                proxy_redirect off;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
+                proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        }
+        location /orchestration-dbis {
+            proxy_pass http://orchestration-dbis;
+        }
+        location /docker-upload {
+            client_max_body_size 200M;
+            proxy_pass http://docker-upload;
+        }
+        location /user-role-management-service/ {
+            proxy_pass http://user-role-management-service/;
+        }
+        location /ota {
+            client_max_body_size 1200M;
+            proxy_pass http://ota;
+        }
+        location /bh-auth {
+            rewrite /bh-auth/(.*)$ /$1 break;
+            proxy_pass http://bh-auth;
+        }
+        location /solace {
+            rewrite /solace/(.*)$ /$1 break;
+            proxy_pass http://solace;
+        }    
+        location /connector-manager-service {
+            rewrite /connector-manager-service/(.*)$ /$1 break;
+            proxy_pass http://connector-manager-service;
+        }
+        location /database-manager-service {
+            rewrite /database-manager-service/(.*)$ /$1 break;
+            proxy_pass http://database-manager-service;
+        }
+        location /health-scheduler-service {
+            rewrite /health-scheduler-service/(.*)$ /$1 break;
+            proxy_pass http://health-scheduler-service;
+        }   
+        location /argocd {
+               proxy_redirect off;
+               proxy_pass http://argocd-server.argocd;
+               proxy_http_version 1.1; # this is essential for chunked responses to work
+               proxy_buffering    off;
+               proxy_set_header   X-Real-IP $remote_addr;
+               proxy_set_header   X-Scheme $scheme;
+               proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+               proxy_set_header   Host $http_host;
+              }
+
+        }
+    }

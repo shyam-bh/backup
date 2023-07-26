@@ -1,0 +1,321 @@
+--- 
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  labels: 
+    app: dep-objectstorage-service
+  name: dep-objectstorage-service
+  annotations:
+    configmap.reloader.stakater.com/reload: "objectstorage-config"    
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels: 
+      app: dep-objectstorage-service
+  template: 
+    metadata: 
+      labels: 
+        app: dep-objectstorage-service
+      annotations:
+        dapr.io/enabled: "true"
+        dapr.io/app-id: "dep-objectstorage-service"
+        dapr.io/app-port: "8080"
+        checksum/defaultconfig: "/configmap-default.yaml"
+        checksum/tenantconfig: "/configmap-tenant.yaml"
+    spec: 
+      containers:       
+        - 
+          image: ghcr.io/bh-ent-tech/objectstorage:v1.2.0.449
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 200m
+            limits:
+              memory: 512Mi
+              cpu: 200m
+          name: dep-objectstorage-service
+          ports: 
+            - 
+              containerPort: 8080
+              name: object-app
+          env:
+            - name: zenkoRegion
+              value: "us-east-1" 
+            - name: multiTenancy
+              value: "false"
+            - name: tenants
+              #value: "916619830955-us-east-1-fs-perf,916619830955-us-east-1-fsdev,rohanbucket,testbucket,devbucket"
+              #value: "fsdev"
+              value: " "
+            - name: objectstorageServer
+              value: "zenko"
+            - name: zenkoEndPoint
+              value: "http://zenko-svc:8000"
+              #value: "https://s3.amazonaws.com"
+              #value: " "
+            - name: zenkoExternalEndpoint
+              value: "https://fs-dev.np-0000177.npause1.bakerhughes.com/zenko"
+            - name: zenkoHealthEndPoint
+              value: "http://zenko-svc:8002"
+            - name: zenkoAccessKey
+              value: "newAccessKey"
+            - name: zenkoSecretKey
+              valueFrom: 
+                secretKeyRef: 
+                  key: zenko_secretKey
+                  name: zenko-key
+            - name: zenkoBucketNameForObjectDownload
+              value: "rohanbucket"
+            - name: zenkoBucketNameForObjectUrl
+              value: "rohanbucket"
+            - name: bucketName
+              value: "objectstorebucket"
+            - name: basefolder
+              value: " "
+            - name: bucketPrefix
+              value: "916619830955-us-east-1-"
+            - name: bucketSuffix
+              value: ""
+            - name: zenkoObjectLocator
+              value: ""
+            - name: zenkoExpiryTime
+              value: "3600"
+            - name: minioEndPoint
+              value: "http://100.64.186.212:30112"
+            - name: minioAccessKey
+              value: "minioadmin"
+            - name: minioSecretKey
+              value: "P@55word"          
+            - name: minioBucketNameForObjectDownload
+              value: "quad"
+            - name: minioBucketNameForObjectUrl
+              value: "quad"
+            - name: minioObjectLocator
+              value: ""
+            - name: rbac.support
+              value: "disabled"
+            - name: isTms
+              value: "false"
+            - 
+              name: DEFAULT_TENANT_CONFIGURATION
+              valueFrom: 
+                configMapKeyRef: 
+                  key: default.conf
+                  name: object-store-configmap-default
+            - 
+              name: TENANT_CONFIGURATION
+              valueFrom: 
+                configMapKeyRef: 
+                  key: tenant.conf
+                  name: objectstorage-configmap-tenant
+            - 
+              name: SECURITY_CONFIGURATION
+              valueFrom: 
+                configMapKeyRef: 
+                  key: rbac.conf
+                  name: object-store-configmap-rbac 
+            - 
+              name: minioExpiryTime
+              valueFrom: 
+                configMapKeyRef: 
+                  key: minio.expiryTime
+                  name: objectstorage-config
+            - 
+              name: folderAccess
+              valueFrom: 
+                configMapKeyRef: 
+                  key: folderAccess
+                  name: objectstorage-config
+            - 
+              name: keycloakRealm
+              valueFrom: 
+                configMapKeyRef: 
+                  key: keycloak.realm
+                  name: objectstorage-config
+            - name: authServerUrl
+              value: "http://100.65.79.254:32000/auth"
+            - 
+              name: abacSupport
+              valueFrom: 
+                configMapKeyRef: 
+                  key: abac.support
+                  name: objectstorage-config
+            - 
+              name: dfcsUrl
+              valueFrom: 
+                configMapKeyRef: 
+                  key: dfcs.url
+                  name: objectstorage-config
+            - 
+              name: cacheTtl
+              valueFrom: 
+                configMapKeyRef: 
+                  key: cache.ttl
+                  name: objectstorage-config
+            - 
+              name: authorizationType
+              valueFrom: 
+                configMapKeyRef: 
+                  key: authorization.type
+                  name: objectstorage-config
+            - 
+              name: keycloakResource
+              valueFrom: 
+                configMapKeyRef: 
+                  key: keycloak.resource
+                  name: objectstorage-config
+            - 
+              name: urlExclusionList
+              valueFrom: 
+                configMapKeyRef: 
+                  key: filter.url-exclusion-list
+                  name: objectstorage-config
+            - 
+              name: rbacSupport
+              valueFrom: 
+                configMapKeyRef: 
+                  key: rbac.support
+                  name: objectstorage-config
+            - 
+              name: keycloakCors
+              valueFrom: 
+                configMapKeyRef: 
+                  key: keycloak.cors
+                  name: objectstorage-config                  
+            -               
+              name: appName
+              valueFrom: 
+                configMapKeyRef: 
+                  key: app.name
+                  name: objectstorage-config
+            - 
+              name: appAddress
+              valueFrom: 
+                fieldRef:
+                  fieldPath: status.podIP
+            - 
+              name: appInstanceId
+              valueFrom: 
+                fieldRef:
+                  fieldPath: metadata.name
+            #- name: clientResourceDetails
+            #  value: '{"policy-enforcer":{"enforcement-mode":"ENFORCING", "paths":[{"path":"/v2/object/*","methods":[{"method":"GET","scopes":["Read"] } ] }]}}'
+            #- name: tenantConfigDetails
+            #  value: '{"ObjectStore":{"resource":"ObjectStoreResource","credentials":{"secret":"LuIzHzOYA60C2bgiaBImKRBDfb47ViJK"}}}'
+            #-  
+            #  name: client.resource.details
+            #  valueFrom:
+            #    configMapKeyRef:
+            #      name: objectstorage-config
+            #      key: objectstorage-client.config
+            #- 
+            #  name: tenant.config.details
+            #  valueFrom:
+            #    configMapKeyRef:
+            #      name: objectstorage-config
+            #      key: objectstorage-tenant.config
+            #- name: clientResourceDetails
+              #value: '{"resource":"ObjectStoreClient","credentials":{"secret":"LuIzHzOYA60C2bgiaBImKRBDfb47ViJK"}}'  
+            #  value: '{"resource":"1cbjah3es4e46mfpk9fmd5lfif","credentials":{"secret":"3GCV7rDnufpeNhp0VWzOWeeGJ3xC7Fjk"}}'
+            #- name: tenantConfigDetails
+              #value: '{"DEFAULT":{"resource":"default_client"},"ObjectStore":{"resource":"ObjectStoreClient","credentials":{"secret":"LuIzHzOYA60C2bgiaBImKRBDfb47ViJK"}}}'
+            #  value: '{"DEFAULT":{"resource":"default_client"},"Default":{"resource":"1cbjah3es4e46mfpk9fmd5lfif","credentials":{"secret":"NP5IAEqYSZhj0yZKT1ukHp62UKtVNok0"}},"us-west-2_LXcosPEcW":{"resource":"1cbjah3es4e46mfpk9fmd5lfif","credentials":{"secret":"3GCV7rDnufpeNhp0VWzOWeeGJ3xC7Fjk"}}}'
+            - name: maxFileSize
+              value: "500MB"
+            - name: maxRequestSize
+              value: "500MB"
+            - name: useSwagger
+              value: "true"
+            - name: healthProbesEnabled
+              value: "true"
+            - name: endpointHealthShowDetails
+              value: "always"
+            - name: endpointHealthReadinessInclude
+              value: "readinessState,healthCheckIndicator"
+            - name: endpointHealthReadinessShowDetails
+              value: "always"
+            - name: managementEndpointsWebBasePath
+              value: "/"
+            - name: managementServerPort
+              value: "5678"
+            - name: customlevel
+              value: "info"
+            - name: auditlevel
+              value: "info"
+            - name: rootlevel
+              value: "info"
+            - name: dapr.url
+              value: http://localhost:3500/v1.0/publish/pubsub/AUDIT
+            - name: clientId
+              value: "app-objectstore"
+            - name: tmsUrl
+              value: "http://bh-tenant-mgmt-service:80/api/v1/tenants"
+            - name: storageLocation
+              value: "aws_s3"
+            - name: azureEndpoint
+              value: ""
+            - name: azureAccount
+              value: ""
+            - name: azureAccessKey
+              value: ""
+            - name: tms.url
+              value: "http://bh-tenant-mgmt-service:80" 
+            - name: tms.details
+              value: "https://fs-dev.np-0000177.npause1.bakerhughes.com"
+            - name: sslRequired
+              value: "NONE"
+            - name: retry.count
+              value: "3"
+            - name: retry.delay
+              value: "5"
+            - name: dapr.confirmation.topic
+              value: "Tenant_Confirmation"               
+            - name: dapr.pubsub.name
+              value: "pubsub"
+            - name: dapr.topic
+              value: "Tenant_Notification"
+            - name: maxRetries
+              value: "3"
+            - name: s3ClientMaxRetries
+              value: "10"
+            - name: allowCircularReferences
+              value: "true"
+            - name: timeout
+              value: "120"
+            -  
+              name: client.resource.details
+              valueFrom:
+                configMapKeyRef:
+                  name: objectstorage-config
+                  key: objectstorage-client.config
+            - 
+              name: tenant.config.details
+              valueFrom:
+                configMapKeyRef:
+                  name: objectstorage-config
+                  key: objectstorage-tenant.config
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: 5678
+            initialDelaySeconds: 200
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: 5678
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+          volumeMounts:
+            - name: tenant-secret-objstore
+              mountPath: /volume/tenant-secret-objstore
+      volumes:
+        - name: tenant-secret-objstore
+          secret:
+            secretName: tenant-secret-objstore
+      imagePullSecrets: 
+        - 
+          name: cde-reg-credentials                        

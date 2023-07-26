@@ -1,0 +1,230 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: dep-docker-upload-service
+  labels:
+    app: docker-upload
+spec:
+  replicas: 1
+  selector:
+    matchLabels: 
+      app: docker-upload
+  template:
+    metadata:
+      labels:
+        app: docker-upload
+    spec:
+      imagePullSecrets:
+         - name: e2c-dev-cred
+      containers:
+        -
+          image: e2c-registry-dev.np-0000173.npause1.bakerhughes.com/repostiory-upload:v1.2.0.130
+          name: docker-upload
+          ports:
+            -
+              containerPort: 8084
+          env:
+            -
+              name: ECR_REPO_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: ECR_REPO_URL
+            -
+              name: ECR_TOKEN_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: ECR_TOKEN_URL
+            -
+              name: DEVICE_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: DEVICE_ID
+            -
+              name: DEPLOYMENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: DEPLOYMENT_ID
+            -
+              name: TOKEN_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: TOKEN_URL
+            -
+              name: CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: CLIENT_ID
+            -
+              name: CLIENT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: CLIENT_SECRET
+            -
+              name: DOCKER_ENGINE_HOST_AND_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: DOCKER_ENGINE_HOST_AND_PORT
+            -
+              name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: REDIS_HOST
+            -
+              name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: REDIS_PORT
+            -
+              name: REDIS_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: REDIS_PASSWORD
+            -
+              name: IMAGE_SCAN_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: IMAGE_SCAN_URL
+            -
+              name: IMAGE_SCAN_FINDINGS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: IMAGE_SCAN_FINDINGS_URL
+            -
+              name: IMAGE_DELETE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: IMAGE_DELETE_URL
+            -
+              name: IMAGE_LIST_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: IMAGE_LIST_URL
+            -
+              name: APP_SHELL_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: APP_SHELL_USERNAME
+            -
+              name: APP_SHELL_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: APP_SHELL_PASSWORD
+            -
+              name: APP_SHELL_TENANT
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: APP_SHELL_TENANT
+            -
+              name: APP_SHELL_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: APP_SHELL_CLIENT_ID
+            -
+              name: APP_SHELL_GRANT_TYPE
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: APP_SHELL_GRANT_TYPE
+            -
+              name: APP_SHELL_CLIENT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: APP_SHELL_CLIENT_SECRET
+            -
+              name: APP_SHELL_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: APP_SHELL_URL
+            -
+              name: DBIS_STATUS_SAVE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: DBIS_STATUS_SAVE_URL
+            -
+              name: DBIS_STATUS_FETCH_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: DBIS_STATUS_FETCH_URL
+            -
+              name: DBIS_STATUS_FETCH_ALL_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: DBIS_STATUS_FETCH_ALL_URL
+            -
+              name: DBIS_STATUS_UPDATE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: DBIS_STATUS_UPDATE_URL
+            -
+              name: KEYCLOAK_REALM
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: KEYCLOAK_REALM
+            -
+              name: KEYCLOAK_SERVER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: KEYCLOAK_SERVER_URL
+            -
+              name: KEYCLOAK_SSL_REQUIRED
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: KEYCLOAK_SSL_REQUIRED
+            -
+              name: EXCLUDE_URL_PATTERN
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: EXCLUDE_URL_PATTERN
+            -
+              name: UAA_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: UAA_CLIENT_ID
+            -
+              name: UAA_CLIENT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: UAA_CLIENT_SECRET
+            -
+              name: DBIS_STATUS_DELETE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: docker-upload-service-configmap
+                  key: DBIS_STATUS_DELETE_URL
+            -
+              name: TENANT_CONFIG_DETAILS
+              valueFrom: 
+                configMapKeyRef: 
+                  name: docker-upload-service-configmap
+                  key: TENANT_CONFIG_DETAILS

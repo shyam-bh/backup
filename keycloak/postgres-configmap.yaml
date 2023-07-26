@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+ name: postgres-config
+ namespace: default
+data:
+  DB_HOST: e2cpgd01.cp2fudfkw6w2.us-east-1.rds.amazonaws.com
+  DB_NAME: e2cdb
+  DB_PASSWORD: e2cmaster
+  DB_PLATFORM: postgres
+  DB_PORT: "5432"
+  DB_TYPE: POSTGRESQL
+  DB_USERNAME: e2cmaster

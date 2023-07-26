@@ -1,0 +1,167 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dep-notification
+  labels:
+    app: dep-notification
+  annotations:
+    secret.reloader.stakater.com/reload: "notification-secret"
+    configmap.reloader.stakater.com/reload: "tenant-config,default-config"
+spec:
+  replicas: 2
+  selector: 
+    matchLabels:
+     app: dep-notification
+  template:
+    metadata:
+      labels:
+        app: dep-notification 
+    spec:
+      imagePullSecrets:
+        - name: cde-reg-credentials
+      volumes:
+       - name: notification-pv-storage
+         persistentVolumeClaim:
+           claimName: notification-pv-claim1
+       - name: tenant-volume
+         secret:
+            secretName: notification-secret
+       - name: certs-bundle-configmap
+         configMap:
+          name: certs-bundle-configmap
+      containers:
+        - name: dep-notification
+          image: ghcr.io/bh-ent-tech/notification-services:v1.0.0.605
+#           startupProbe:
+#            httpGet:
+#              path: /health/startup
+#              port: 5678
+#            initialDelaySeconds: 25
+#            periodSeconds: 120
+#            timeoutSeconds: 5
+#           readinessProbe:
+#             httpGet:
+#               path: /health/readiness
+#               port: 5678
+#             initialDelaySeconds: 25
+#             periodSeconds: 120
+#             timeoutSeconds: 5
+#           livenessProbe:
+#             httpGet:
+#               path: /health/liveliness
+#               port: 5678
+#             initialDelaySeconds: 30
+#             periodSeconds: 120
+#             timeoutSeconds: 5          
+          env:
+          - name: NODE_ENV
+            value: "development"
+          - name: SSU
+            value: "http://100.65.79.254:32000/auth"
+#            value: "https://keycloak.np-0000177.npause1.bakerhughes.com/auth"
+          - name: client_id
+            value: "appnotification"
+          - name: client_secret
+            value: "pfMWN1NRPRNA5csp0hMzubzQ70arHUII"
+          - name: RBAC_SUPPORT
+            value: "disable"
+          - name: ABAC_SUPPORT
+            value: "enabled"
+          - name: USE_TMS
+            value: "false"
+          - name: TENANT_CONFIGURATION
+            valueFrom:
+              configMapKeyRef:
+                name: tenant-config
+                key: notificationsvc.conf
+          - name: DEFAULT_TENANT_CONFIGURATION
+            valueFrom:
+              configMapKeyRef:
+                name: default-config
+                key: default.conf
+          - name: SECURITY_CONFIGURATION
+            valueFrom:
+              configMapKeyRef:
+                name: rbac-config
+                key: ACCS-path.conf
+#           - name: TENANT_INFO
+#             valueFrom:
+#               configMapKeyRef:
+#                 name: rbac-config
+#                 key: ACCS.conf
+          - name: AUTH_TYPE
+            value: 'close'
+          - name: HSTS_IN_DAYS
+            value: "0"
+#           - name: REDIS_URL
+#             value: 'redis://clustercfg.scewut2slr02f1t.hacmdt.use1.cache.amazonaws.com:6379'
+          - name: REDIS_HOST
+            value: 'clustercfg.scewut2slr02f1t.hacmdt.use1.cache.amazonaws.com'
+          - name: REDIS_PORT
+            value: '6379'  
+          - name: REDIS_TLS
+            value: 'true'
+          - name: REDIS_CLUSTER
+            value: 'true'          
+          - name: NODE_EXTRA_CA_CERTS
+            value: /usr/local/share/ca-certificates/certs-bundle.pem
+          - name: REDIS_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: notification-secret
+                key: REDIS_AUTH
+          - name: DB_HOST
+            value: 'fsnpgd04.c6ooanpu2tgf.us-east-1.rds.amazonaws.com'
+          - name: DB_PORT
+            value: '5432'
+          - name: DB_USERNAME
+            value: 'notifi'
+          - name: DB_PASSWORD
+            value: 'PvfUixMwBYUp9sIE'
+          - name: DB_NAME
+            value: 'fsnpgd04'
+          - name: PG_TLS
+            value: 'true'
+          - name: DB_DEFAULT
+            value: 'postgres'
+          - name: IS_FILE_UPLOAD
+            value: 'true'  
+          - name: HEALTHCHECK_PORT
+            value: '5678'
+          - name: SMTP_LOGS
+            value: 'false'
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: TENANT_FILE_PATH
+            value: '/volume/tenant-secret'  
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "1024Mi"
+              cpu: "500m"
+            limits:
+              memory: "1024Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 3000
+              name: notification
+            - containerPort: 5432
+              name: postgres-db
+            - containerPort: 5678
+              name: health-port
+          volumeMounts:
+           - mountPath: "/volume/attatchements"
+             name: notification-pv-storage
+           - mountPath: "/volume/tenant-secret"
+             name: tenant-volume
+           - mountPath: /usr/local/share/ca-certificates/certs-bundle.pem
+             name: certs-bundle-configmap 
+             subPath: certs-bundle.pem
+             readOnly: false
+          

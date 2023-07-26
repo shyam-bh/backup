@@ -1,0 +1,316 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dep-alert-service-2-0
+  labels:
+    app: dep-alert-service-2-0
+  annotations:
+    configmap.reloader.stakater.com/reload: "alerts2-configmap,alert2-pg-config,alert-certs-bundle-configmap,tenant-configmap"
+    secret.reloader.stakater.com/reload: "alert2-secret,alert2-postgresdb-key,tenant-secret,alert-configmap-default,alert-configmap-tenant,alert-configmap-rbac"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+     app: dep-alert-service-2-0
+  template:
+    metadata:
+      labels:
+        app: dep-alert-service-2-0
+#       annotations:
+#         dapr.io/enabled: "false"
+#         dapr.io/app-id: "dep-alert-service-2-0"
+#         dapr.io/app-port: "5001"
+    spec:
+      imagePullSecrets:
+        - name: cde-reg-credentials
+      volumes:
+        - configMap:
+            name: alerts2-configmap
+            items:
+              - key: initial-types.json
+                path: initial-types.json
+          name: alerts2-config
+        - configMap:
+            name: tenant-config
+            items:
+              - key: tenant.json
+                path: tenant.json
+          name: tenant-configmap
+        - emptyDir: {}
+          name: scripts
+        - name: tenant-volume
+          secret:
+            secretName: tenant-secret
+        - name: alert-certs-bundle-configmap
+          configMap:
+            name: alert-certs-bundle-configmap
+      containers:
+        - name: dep-alert-service-2-0
+          image: ghcr.io/bh-ent-tech/alert-2.0:v1.3.0.936
+          volumeMounts:
+            - mountPath: /app/metadata-config/initial-types.json
+              subPath: initial-types.json
+              name: alerts2-config
+            - mountPath: /app/migration
+              name: scripts
+            - mountPath: '/app/tenant-info'
+              name: tenant-volume
+            - mountPath: /usr/local/share/ca-certificates/certs-bundle.pem
+              name: alert-certs-bundle-configmap 
+              subPath: alert-certs-bundle.pem
+              readOnly: true
+          env:
+          # Contented moved to configmap-tenant.yaml
+          #- name: TENANT_CONFIGURATION
+          #  valueFrom:
+          #    configMapKeyRef:
+          #      name: alert-tenant-config
+          #      key: alert_tenant.conf
+          - name: TENANT_CONFIGURATION
+            valueFrom:
+              configMapKeyRef:
+                name: alert-configmap-tenant
+                key: tenant.conf
+          - name: DEFAULT_TENANT_CONFIGURATION
+            valueFrom:
+              configMapKeyRef:
+                name: alert-configmap-default
+                key: default.conf
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                name: alert2-pg-config
+                key: DB_HOST
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: alert2-pg-config
+                key: DB_PORT
+          - name: DB_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                name: alert2-pg-config
+                key: DB_USERNAME
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: alert2-postgresdb-key
+                key: ALERT_PASSWORD
+          #PG_TLS should be set to true if TLS is required for PG
+          - name: PG_TLS
+            value: "true"
+          #NODE_EXTRA_CA_CERTS value should be provided when TLS is enabled(PG_TLS=true)
+          - name: NODE_EXTRA_CA_CERTS
+            value: /usr/local/share/ca-certificates/certs-bundle.pem
+          - name: DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                name: alert2-pg-config
+                key: DB_NAME
+          - name: DB_DEFAULT
+            valueFrom:
+              configMapKeyRef:
+                name: alert2-pg-config
+                key: DB_DEFAULT
+          - name: NODE_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name      
+          - name: NODE_ENV
+            value: "qa"
+          - name: LOGGER
+            value: '{ "displayLevel":"null","logTo":"console", "threshold":"debug", "field":["timestamp","level","message","stack"]}'
+          - name: REDIS_HOST
+            value: "clustercfg.sce70pppnfyt20r.hacmdt.use1.cache.amazonaws.com"
+          - name: REDIS_PORT
+            value: "6379"
+          - name: REDIS_PASSWORD
+            valueFrom:
+             secretKeyRef:
+               name: alert2-secret
+               key: REDIS_PWD
+          - name: REDIS_CLUSTER
+            value: "true"
+          #REDIS_CRT, REDIS_KEY and REDIS_CA_CRT values should be provided while using TLS enabled Redis on premise/ local
+#           - name: REDIS_CRT
+#             valueFrom:
+#               secretKeyRef:
+#                 name: alert2-secret
+#                 key: REDIS_CRT_CERT
+#           - name: REDIS_KEY
+#             valueFrom:
+#               secretKeyRef:
+#                 name: alert2-secret
+#                 key: REDIS_KEY_CERT
+#           - name: REDIS_CA_CRT
+#             valueFrom:
+#               secretKeyRef:
+#                 name: alert2-secret
+#                 key: REDIS_CA_CRT_CERT   
+          #REDIS_TLS should be set to true if TLS is required for Redis          
+          - name: REDIS_TLS
+            value: "true"
+          - name: PORT
+            value: "8000"
+          - name: SERVER_PORT
+            value: "3000"
+          - name: SWAGGER_BASE_URL
+            value: "https://fs-dev.np-0000177.npause1.bakerhughes.com/alert2"
+          - name: PAYLOAD_SIZE
+            value: 15MB
+          - name: MOUNT_PATH
+            value: /app/metadata-config/initial-types.json
+          - name: MAX_PAGE_SIZE
+            value: "3000"
+          - name: MESSAGE_SERVICE_PROVIDER
+            value: "AMAZONRABBITMQ"
+          - name: ENABLE_NOTIFICATION
+            value: "true"
+          - name: MQ_ENDPOINT
+            value: "Alert_Topic"
+          - name: BROKER_CONNECTION_STRING
+            value: "amqps://fsalert:AQBHk0iKSf28mGP6@b-f15207c5-bb94-4a13-8f93-216ff44cdb5b.mq.us-east-1.amazonaws.com:5671"
+#             value: "amqps://alert:Ra181gz07nd3@dev-alertfs2-mq.cde.fullstream.ai:443"
+          - name: BROKER_PASSWORD
+            value: "AQBHk0iKSf28mGP6"
+#             value: "Ra181gz07nd3"
+          - name: CLIENT_ID
+            value: "app-alert"
+#           - name: CLIENT_SECRET
+#             value: "CXCZn9Mlq7NDhF2sEFnWDfUop1k8Tf6z"
+#             value: "wZr0IB7Be3wqkEbiA3nwJqq98t28tKW2"
+            # Not in Use
+          #- name: DEFAULT_TENANT
+          #  value: "Default"
+          #- name: DEFAULT_CLIENT_ID
+          #  value: "app-service"
+          #- name: DEFAULT_CLIENT_SECRET
+          #  value: "ctWjgecmmqXTZE3BlQ6xE7z8VVsrwIP9"
+          - name: AUTHORIZATION_TYPE
+            value: "open"
+          - name: RBAC_SUPPORT  
+            value: "disabled"
+          - name: ABAC_SUPPORT
+            value: "enabled"
+          # Not in Use
+          - name: PATH_CONFIG_RBAC
+            valueFrom:
+              configMapKeyRef:
+                name: alerts2-configmap
+                key: rbac.conf
+           # need to remove PATH_CONFIG_RBAC after nfr testing
+          - name: SECURITY_CONFIGURATION
+            valueFrom:
+              configMapKeyRef:
+                name: alert-configmap-rbac
+                key: rbac.conf
+          # Not in Use
+          #- name: TENANT_INFO
+          #  valueFrom:
+          #    configMapKeyRef:
+          #      name: rbac-configmap
+          #      key: ACCS.conf
+          #- name: TENANT_INFO
+          #  valueFrom:
+          #    configMapKeyRef:
+          #      name: alert-configmap-tenant
+          #      key: tenant.conf
+          - name: AUTH_TYPE
+            value: 'open'    
+          - name: DFCS_URL
+            value: "https://ss-qa.cde.fullstream.ai/dfc-svc/v1/filterAttributes"
+          - name: SSU
+            value: "http://100.65.79.254:32000/auth"
+          # Not in Use
+          #  value: "https://ss-kc-qa.cde.fullstream.ai/auth"
+          #  value: "https://keycloak.np-0000177.npause1.bakerhughes.com/auth"
+          #  value: "http://100.64.206.214:32000/auth"
+          - name: CACHE_TTL
+            value: "60"
+          - name: ELASTIC_APM_SERVICE_NAME
+            value: "Alerts2_DEV"
+          - name: ELASTIC_APM_SERVER_URL
+            value: "http://172.16.30.167:8200"
+          - name: ENABLE_MONITORING
+            value: "false"  
+          - name: ROUTING_KEYS
+            value: "tenant,source,groupId,operation,typeId"
+          - name: MIGRATION_FILE_PATH
+            value: "/app/migration"
+          - name: REBUILD_CACHE
+            value: "true" 
+          - name: SUB_GROUP_LIMIT
+            value: "100" 
+          - name: SUB_GROUP_LIMITS
+            value: "3000,10000,50000,200000"
+          - name: ENABLE_SWAGGER
+            value: "true"
+          - name: TENANT_FILE_PATH
+            value: /app/tenant-info
+            
+          #DAPR Config
+          #- name: DAPR_URL
+          #  value: 'http://localhost:3500/v1.0/publish/pubsub/Tenant_Notification'
+          #- name: DAPR_HOST
+          #  value: '127.0.0.1'
+          #- name: DAPR_PORT
+          #  value: '3500'
+          #- name: DAPR_SERVER_HOST
+          #  value: '127.0.0.1'  
+          #- name: DAPR_SERVER_PORT
+          #  value: '5001'
+          #- name: PUBSUB_COMPONENT
+          #  value: 'pubsub'
+          #- name: PUBSUB_TOPIC
+          #  value: 'Tenant_Notification'
+          #- name: PUBSUB_CONFIRMATION_TOPIC
+          #  value: 'Tenant_Confirmation'          
+          #- name: TMS_URL
+          #  value: "http://bh-tenant-mgmt-service"
+          #- name: TENANT_GET_ALL_MAX
+          #  value: "20"          
+          #- name: SERVICEID
+          #  value: "alert_hash"
+          
+          - name: SERVICE_ID
+            value: "alert_hash"
+          - name: USE_TMS
+            value: "false"
+            
+          #Not In Use          
+          #- name: TENANT_NAMES
+          #  value: 'tenantRupesh,tenantaditya,DastTestqq1,DastTestqq5,DastTestqq6,ssTest00221'
+          #- name: TENANT_IDS
+          #  value: 'default,SPARQ-DEV,0b241a24-22ea-4c0f-ab8b-2972c3d6b6cc,0b241a24-22ea-4c0f-ab8b-2972c3d5b5cc,0b241a24-22ea-4c0f-ab8b-2972c3d5b5de,fd2a180d-fa7a-4510-9035-3bc980ca0989,75b71e9c-ffe0-46ec-a897-5ee83679025e,eo2a180d-fa7a-4510-9035-3bc980cb0900,6231dd6d-9f98-457f-ada4-10a900af1deb'  
+          #- name: DEFAULT_TENANT_NAME
+          #  value: "SPARQ-DEV" 
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: alert-2-0-app
+            - containerPort: 5432
+              name: postgres-db
+            - containerPort: 3000
+              name: alert-app-2
+      initContainers:
+       - args:
+           - '-c'
+           - |
+             echo "Copying migration scripts..."
+             cp -R /migrations/* /migration
+         command:
+           - sh
+         image: ghcr.io/bh-ent-tech/bh-alert2-migration-scripts-dev:101
+         imagePullPolicy: Always
+         name: migration-scripts-provider
+         volumeMounts:
+           - mountPath: /migration
+             name: scripts

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: advisory-pgdb-config
+data:
+  DB_HOST: "fsnpgd04.c6ooanpu2tgf.us-east-1.rds.amazonaws.com"
+  DB_PORT: "5432"
+  DB_USERNAME: "notifi"
+  DB_NAME: "ofedevfs"
