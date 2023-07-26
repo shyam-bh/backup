@@ -1,0 +1,933 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: This cloudformation template creates a codebuild that install ArgoCD on EKS cluster. 
+Parameters:
+  ServiceZipFile:
+    Description:  Name of the application infra zip file uploaded to s3 bucket in CICD account.
+    Type: String
+    Default: "zip-lambda-mst-get"
+  Env:
+    Description: Enter the environment for application. (Required)
+    Type: String
+    AllowedValues:
+      - dev
+      - qa
+      - prod
+      - stg
+  AppNamemstget:
+    Description: (Required) Enter Application Name.
+    Type: String
+    AllowedPattern: '[^\s]+'
+    ConstraintDescription: application name tag min 3 and max 50 characters
+    MinLength: 3
+    MaxLength: 50
+    Default: "zip-lambda-mst-get"
+  AppNamepipelineGET:
+    Description: (Required) Enter Application Name.
+    Type: String
+    AllowedPattern: '[^\s]+'
+    ConstraintDescription: application name tag min 3 and max 50 characters
+    MinLength: 3
+    MaxLength: 50
+    Default: "zip-lambda-pipeline-get"
+  AppNameproductget:
+    Description: (Required) Enter Application Name.
+    Type: String
+    AllowedPattern: '[^\s]+'
+    ConstraintDescription: application name tag min 3 and max 50 characters
+    MinLength: 3
+    MaxLength: 50
+    Default: "zip-lambda-product-get"
+  AppNameprojectsGET:
+    Description: (Required) Enter Application Name.
+    Type: String
+    AllowedPattern: '[^\s]+'
+    ConstraintDescription: application name tag min 3 and max 50 characters
+    MinLength: 3
+    MaxLength: 50
+    Default: "zip-lambda-projects-get"
+  AppNamesectionsGET:
+    Description: (Required) Enter Application Name.
+    Type: String
+    AllowedPattern: '[^\s]+'
+    ConstraintDescription: application name tag min 3 and max 50 characters
+    MinLength: 3
+    MaxLength: 50
+    Default: "zip-lambda-sections-get"
+  AppNamelegacyBHGET:
+    Description: (Required) Enter Application Name.
+    Type: String
+    AllowedPattern: '[^\s]+'
+    ConstraintDescription: application name tag min 3 and max 50 characters
+    MinLength: 3
+    MaxLength: 50
+    Default: "zip-lambda-legacyBH-get"
+  AppNameproductput:
+    Description: (Required) Enter Application Name.
+    Type: String
+    AllowedPattern: '[^\s]+'
+    ConstraintDescription: application name tag min 3 and max 50 characters
+    MinLength: 3
+    MaxLength: 50
+    Default: "zip-lambda-product-put"
+  AppNamesectionsput:
+    Description: (Required) Enter Application Name.
+    Type: String
+    AllowedPattern: '[^\s]+'
+    ConstraintDescription: application name tag min 3 and max 50 characters
+    MinLength: 3
+    MaxLength: 50
+    Default: "zip-lambda-sections-put"
+  AppNamealppost:
+    Description: (Required) Enter Application Name.
+    Type: String
+    AllowedPattern: '[^\s]+'
+    ConstraintDescription: application name tag min 3 and max 50 characters
+    MinLength: 3
+    MaxLength: 50
+    Default: "zip-lambda-alp-post"
+  AppNamealpautocompletePOST:
+    Description: (Required) Enter Application Name.
+    Type: String
+    AllowedPattern: '[^\s]+'
+    ConstraintDescription: application name tag min 3 and max 50 characters
+    MinLength: 3
+    MaxLength: 50
+    Default: "zip-lambda-alpautocomplete-POST"
+  AppNamealpfiltervaluesPOST:
+    Description: (Required) Enter Application Name.
+    Type: String
+    AllowedPattern: '[^\s]+'
+    ConstraintDescription: application name tag min 3 and max 50 characters
+    MinLength: 3
+    MaxLength: 50
+    Default: "zip-lambda-alpfiltervalues-POST"
+  AppNameservicesGET:
+    Description: (Required) Enter Application Name.
+    Type: String
+    AllowedPattern: '[^\s]+'
+    ConstraintDescription: application name tag min 3 and max 50 characters
+    MinLength: 3
+    MaxLength: 50
+    Default: "zip-lambda-services-GET"
+  autocompleteOptionsget:
+    Description: (Required) Enter Application Name.
+    Type: String
+    AllowedPattern: '[^\s]+'
+    ConstraintDescription: application name tag min 3 and max 50 characters
+    MinLength: 3
+    MaxLength: 50
+    Default: "zip-lambda-autocompleteOptions-get"
+  UAI:
+    Description: (Required) Enter ServiceNow ID.
+    Type: String
+    AllowedPattern: '[^\s]+'
+    ConstraintDescription: ' uai tag min 3 and max 50 characters'
+    MinLength: 3
+    MaxLength: 50
+    Default: "UAI00036255"
+  DevelopmentAccount:
+    Description: Select Account Number of the Desired Application Environment
+    Type: String
+    AllowedValues:
+      - '023240594080'
+      - '328646454108'
+      - '751907194387'
+  SourceBranch:
+    Description: 'Git repository branch used to pull the code from'
+    Type: String
+    Default: "US412346-Autocomplete-API"
+  GithubToken:
+    Description: GitHub API Token used for code pull during CodeBuild.
+    Type: String
+    NoEcho : true
+Resources:
+  ResolveCICDKMS:
+    Type: Custom::get-kms-arn
+    Properties:
+      ServiceToken: !Join
+        - ':'
+        - - 'arn:aws:lambda'
+          - !Ref AWS::Region
+          - !Ref AWS::AccountId
+          - 'get-kms-arn'
+      KeyAlias: 'alias/cicd-kmskey'
+
+  CodeBuildCfnNag:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+      Name: !Sub 'CodeBuildCfnNag-${ServiceZipFile}-${Env}'
+      Description: Download scripts and Run CFN_NAG on templates
+      ServiceRole: !Sub 'arn:aws:iam::${AWS::AccountId}:role/CICD-CodeBuildService-Role'
+      EncryptionKey: !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/${ResolveCICDKMS.key_id}
+      Artifacts:
+        Type: CODEPIPELINE
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: 'aws/codebuild/ruby:2.5.3'
+        EnvironmentVariables:
+          - Name: REGION_NAME
+            Value: !Ref 'AWS::Region'
+          - Name: ACCOUNT_ID
+            Value: !Ref 'AWS::AccountId'
+      Source:
+        Type: CODEPIPELINE
+        BuildSpec: |
+          version: 0.2
+          phases:
+            install:
+              commands:
+                - export current=`pwd`
+                - apt-get -y update
+                - gem install cfn-nag
+                - apt-get install -y dos2unix
+            pre_build:
+              commands:
+                - export LC_ALL="en_US.UTF-8"
+                - locale-gen en_US en_US.UTF-8
+                - dpkg-reconfigure locales
+            build:
+              commands:
+                - |
+                  #!/bin/bash
+                  find . -ls                  
+                  for f in ./*.yaml
+                  do
+                      if cfn_nag_scan --input-path "$f"; then
+                          echo "$f PASSED"
+                      else
+                          echo "$f FAILED"
+                          touch FAILED
+                      fi
+                  done
+
+                  if [ -e FAILED ]; then
+                    echo cfn-nag FAILED at least once!
+                    exit 1
+                  else
+                    echo cfn-nag PASSED on all files!
+                    exit 0
+                  fi
+      TimeoutInMinutes: 10
+  Pipeline:
+    Type: 'AWS::CodePipeline::Pipeline'
+    Properties:
+      Name: !Sub '${ServiceZipFile}-${Env}-Pipeline'
+      RoleArn: !Sub 'arn:aws:iam::${AWS::AccountId}:role/CICD-PipelineService-Role'
+      ArtifactStore:
+        Type: S3
+        Location: !Sub 'cicd-pipeline-artifacts-${AWS::AccountId}-${AWS::Region}'
+        EncryptionKey:
+          Id: !GetAtt ResolveCICDKMS.key_id
+          Type: KMS
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: TemplateSource
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: S3
+                Version: '1'
+              Configuration:
+                S3Bucket: !Sub '${AWS::AccountId}-${AWS::Region}-cicd-src'
+                PollForSourceChanges: true
+                S3ObjectKey: !Sub '${ServiceZipFile}.zip'
+              OutputArtifacts:
+                - Name: SourceArtifacts
+              RunOrder: 1
+            - Name: TemplateSourceGit
+              Namespace: SourceVariables
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: '1'
+              Configuration:
+                Owner: BH-PPS-ILI-Software-Engineering
+                Repo: Soteria
+                PollForSourceChanges: false
+                Branch: !Ref SourceBranch
+                OAuthToken: !Ref GithubToken
+              OutputArtifacts:
+                - Name: GitArtifacts
+              RunOrder: 2
+        - Name: CFTTemplateScan
+          Actions:
+            - InputArtifacts:
+                - Name: SourceArtifacts
+              Name: DownloadScriptsAndRuncfnNag
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: '1'
+                Provider: CodeBuild
+              OutputArtifacts:
+                - Name: DownloadScripts
+              Configuration:
+                ProjectName: !Ref CodeBuildCfnNag
+              RunOrder: 1
+        - Name: zip-lambda-mst-get-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 1
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName: !Sub StackCFT-zip-LAMBDA-For-${AppNamemstget}-prod
+                TemplatePath: SourceArtifacts::service-mstget.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-mstget.json
+                ParameterOverrides: !Sub |
+                  {
+                    "AppNamemstget": "${AppNamemstget}",
+                    "KMSKey": "${ResolveCICDKMS.key_id}"
+                  }
+
+            - Name: Invoke-Codebuild-mstget
+              InputArtifacts:
+                - Name: GitArtifacts
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: '1'
+                Provider: CodeBuild
+              RoleArn: !Sub "arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role"
+              Configuration:
+                ProjectName: !Sub arn:aws:codebuild:${AWS::Region}:${DevelopmentAccount}:project/Codebuild-${AppNamemstget}-zip-upload
+              RunOrder: 2
+
+        - Name: create-lambda-mst-get-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 3
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName:  !Sub StackCFT-Create-Lambda-For-${AppNamemstget}-prod
+                TemplatePath: SourceArtifacts::service-lambda-mstget.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-lambda-mstget.json
+
+        - Name: zip-lambda-mst-pipeline-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 4
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName: !Sub StackCFT-zip-Lambda-For-${AppNamepipelineGET}-prod
+                TemplatePath: SourceArtifacts::service-pipelineGET.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-pipelineGET.json
+                ParameterOverrides: !Sub |
+                  {
+                    "AppNamepipelineGET": "${AppNamepipelineGET}",
+                    "KMSKey": "${ResolveCICDKMS.key_id}"
+                  }
+
+            - Name: Invoke-Codebuild-pipelineGET
+              InputArtifacts:
+                - Name: GitArtifacts
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: '1'
+                Provider: CodeBuild
+              RoleArn: !Sub "arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role"
+              Configuration:
+                ProjectName: !Sub arn:aws:codebuild:${AWS::Region}:${DevelopmentAccount}:project/Codebuild-${AppNamepipelineGET}-zip-upload
+              RunOrder: 5
+
+        - Name: create-lambda-pipeline-get-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 6
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName:  !Sub StackCFT-Create-Lambda-For-${AppNamepipelineGET}-prod
+                TemplatePath: SourceArtifacts::service-lambda-pipelineGET.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-lambda-pipelineGET.json
+
+        - Name: zip-lambda-product-get-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 7
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName: !Sub StackCFT-zip-Lambda-For-${AppNameproductget}-prod
+                TemplatePath: SourceArtifacts::service-productget.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-productget.json
+                ParameterOverrides: !Sub |
+                  {
+                    "AppNameproductget": "${AppNameproductget}",
+                    "KMSKey": "${ResolveCICDKMS.key_id}"
+                  }
+
+            - Name: Invoke-Codebuildproductget
+              InputArtifacts:
+                - Name: GitArtifacts
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: '1'
+                Provider: CodeBuild
+              RoleArn: !Sub "arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role"
+              Configuration:
+                ProjectName: !Sub arn:aws:codebuild:${AWS::Region}:${DevelopmentAccount}:project/Codebuild-${AppNameproductget}-zip-upload
+              RunOrder: 8
+
+        - Name: create-lambda-product-get-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 9
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName:  !Sub StackCFT-Create-Lambda-For-${AppNameproductget}-prod
+                TemplatePath: SourceArtifacts::service-lambda-productget.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-lambda-productget.json
+
+        - Name: zip-lambda-projects-get-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 10
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName: !Sub StackCFT-zip-Lambda-For-${AppNameprojectsGET}-prod
+                TemplatePath: SourceArtifacts::service-projectsget.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-projectsget.json
+                ParameterOverrides: !Sub |
+                  {
+                    "AppNameprojectsGET": "${AppNameprojectsGET}",
+                    "KMSKey": "${ResolveCICDKMS.key_id}"
+                  }
+
+            - Name: Invoke-Codebuild-projectsget
+              InputArtifacts:
+                - Name: GitArtifacts
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: '1'
+                Provider: CodeBuild
+              RoleArn: !Sub "arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role"
+              Configuration:
+                ProjectName: !Sub arn:aws:codebuild:${AWS::Region}:${DevelopmentAccount}:project/Codebuild-${AppNameprojectsGET}-zip-upload
+              RunOrder: 11
+
+        - Name: create-lambda-projects-get-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 12
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName:  !Sub StackCFT-Create-Lambda-For-${AppNameprojectsGET}-prod
+                TemplatePath: SourceArtifacts::service-lambda-projectsget.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-lambda-projectsget.json
+
+        - Name: zip-lambda-sections-get-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 13
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName: !Sub StackCFT-zip-Lambda-For-${AppNamesectionsGET}-prod
+                TemplatePath: SourceArtifacts::service-sectionsget.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-sectionsget.json
+                ParameterOverrides: !Sub |
+                  {
+                    "AppNamesectionsGET": "${AppNamesectionsGET}",
+                    "KMSKey": "${ResolveCICDKMS.key_id}"
+                  }
+
+            - Name: Invoke-Codebuild-sectionsget
+              InputArtifacts:
+                - Name: GitArtifacts
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: '1'
+                Provider: CodeBuild
+              RoleArn: !Sub "arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role"
+              Configuration:
+                ProjectName: !Sub arn:aws:codebuild:${AWS::Region}:${DevelopmentAccount}:project/Codebuild-${AppNamesectionsGET}-zip-upload
+              RunOrder: 14
+
+        - Name: create-lambda-sections-get-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 15
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName:  !Sub StackCFT-Create-Lambda-For-${AppNamesectionsGET}-prod
+                TemplatePath: SourceArtifacts::service-lambda-sectionsget.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-lambda-sectionsget.json
+
+        - Name: zip-lambda-legacyBH-get-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 16
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName: !Sub StackCFT-zip-Lambda-For-${AppNamelegacyBHGET}-prod
+                TemplatePath: SourceArtifacts::service-legacyBHget.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-legacyBHget.json
+                ParameterOverrides: !Sub |
+                  {
+                    "AppNamelegacyBHGET": "${AppNamelegacyBHGET}",
+                    "KMSKey": "${ResolveCICDKMS.key_id}"
+                  }
+
+            - Name: Invoke-Codebuild-legacyBHget
+              InputArtifacts:
+                - Name: GitArtifacts
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: '1'
+                Provider: CodeBuild
+              RoleArn: !Sub "arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role"
+              Configuration:
+                ProjectName: !Sub arn:aws:codebuild:${AWS::Region}:${DevelopmentAccount}:project/Codebuild-${AppNamelegacyBHGET}-zip-upload
+              RunOrder: 17
+
+        - Name: create-lambda-legacyBH-get-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 18
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName:  !Sub StackCFT-Create-Lambda-For-${AppNamelegacyBHGET}-prod
+                TemplatePath: SourceArtifacts::service-lambda-legacyBHget.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-lambda-legacyBHget.json
+
+        - Name: zip-lambda-alp-post-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 19
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName: !Sub StackCFT-zip-Lambda-For-${AppNamealppost}-prod
+                TemplatePath: SourceArtifacts::service-alppost.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-alppost.json
+                ParameterOverrides: !Sub |
+                  {
+                    "AppNamealppost": "${AppNamealppost}",
+                    "KMSKey": "${ResolveCICDKMS.key_id}"
+                  }
+
+            - Name: Invoke-Codebuild-alppost
+              InputArtifacts:
+                - Name: GitArtifacts
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: '1'
+                Provider: CodeBuild
+              RoleArn: !Sub "arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role"
+              Configuration:
+                ProjectName: !Sub arn:aws:codebuild:${AWS::Region}:${DevelopmentAccount}:project/Codebuild-${AppNamealppost}-zip-upload
+              RunOrder: 20
+
+        - Name: create-lambda-alp-post-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 21
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName:  !Sub StackCFT-Create-Lambda-For-${AppNamealppost}-prod
+                TemplatePath: SourceArtifacts::service-lambda-alppost.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-lambda-alppost.json
+
+        - Name: zip-lambda-alpautocomplete-POST-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 22
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName: !Sub StackCFT-zip-Lambda-For-${AppNamealpautocompletePOST}-prod
+                TemplatePath: SourceArtifacts::service-alpautocompletePOST.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-alpautocompletePOST.json
+                ParameterOverrides: !Sub |
+                  {
+                    "AppNamealpautocompletePOST": "${AppNamealpautocompletePOST}",
+                    "KMSKey": "${ResolveCICDKMS.key_id}"
+                  }
+
+            - Name: Invoke-Codebuild-alpautocompletePOST
+              InputArtifacts:
+                - Name: GitArtifacts
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: '1'
+                Provider: CodeBuild
+              RoleArn: !Sub "arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role"
+              Configuration:
+                ProjectName: !Sub arn:aws:codebuild:${AWS::Region}:${DevelopmentAccount}:project/Codebuild-${AppNamealpautocompletePOST}-zip-upload
+              RunOrder: 23
+
+        - Name: create-lambda-alpautocomplete-POST-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 24
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName:  !Sub StackCFT-Create-Lambda-For-${AppNamealpautocompletePOST}-prod
+                TemplatePath: SourceArtifacts::service-lambda-alpautocompletePOST.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-lambda-alpautocompletePOST.json
+
+        - Name: zip-lambda-alpfiltervaluesPOST-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 25
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName: !Sub StackCFT-zip-Lambda-For-${AppNamealpfiltervaluesPOST}-prod
+                TemplatePath: SourceArtifacts::service-alpfiltervaluesPOST.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-alpfiltervaluesPOST.json
+                ParameterOverrides: !Sub |
+                  {
+                    "AppNamealpfiltervaluesPOST": "${AppNamealpfiltervaluesPOST}",
+                    "KMSKey": "${ResolveCICDKMS.key_id}"
+                  }
+
+            - Name: Invoke-Codebuild-alpfiltervaluesPOST
+              InputArtifacts:
+                - Name: GitArtifacts
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: '1'
+                Provider: CodeBuild
+              RoleArn: !Sub "arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role"
+              Configuration:
+                ProjectName: !Sub arn:aws:codebuild:${AWS::Region}:${DevelopmentAccount}:project/Codebuild-${AppNamealpfiltervaluesPOST}-zip-upload
+              RunOrder: 26
+
+        - Name: create-lambda-alpfiltervalues-POST-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 27
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName:  !Sub StackCFT-Create-Lambda-For-${AppNamealpfiltervaluesPOST}-prod
+                TemplatePath: SourceArtifacts::service-lambda-alpfiltervaluesPOST.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-lambda-alpfiltervaluesPOST.json
+        - Name: zip-lambda-services-GET-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 28
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName: !Sub StackCFT-zip-Lambda-For-${AppNameservicesGET}-prod
+                TemplatePath: SourceArtifacts::service-servicesGET.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-servicesGET.json
+                ParameterOverrides: !Sub |
+                  {
+                    "AppNameservicesGET": "${AppNameservicesGET}",
+                    "KMSKey": "${ResolveCICDKMS.key_id}"
+                  }
+
+            - Name: Invoke-Codebuild-servicesGET
+              InputArtifacts:
+                - Name: GitArtifacts
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: '1'
+                Provider: CodeBuild
+              RoleArn: !Sub "arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role"
+              Configuration:
+                ProjectName: !Sub arn:aws:codebuild:${AWS::Region}:${DevelopmentAccount}:project/Codebuild-${AppNameservicesGET}-zip-upload
+              RunOrder: 29
+
+        - Name: create-lambda-services-GET-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 30
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName:  !Sub StackCFT-Create-Lambda-For-${AppNameservicesGET}-prod
+                TemplatePath: SourceArtifacts::service-lambda-servicesGET.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-lambda-servicesGET.json
+
+        - Name: zip-lambda-autocompleteOptionsget-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 31
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName: !Sub StackCFT-zip-Lambda-For-${autocompleteOptionsget}-prod
+                TemplatePath: SourceArtifacts::service-autocompleteOptionsget.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-autocompleteOptionsget.json
+                ParameterOverrides: !Sub |
+                  {
+                    "autocompleteOptionsget": "${autocompleteOptionsget}",
+                    "KMSKey": "${ResolveCICDKMS.key_id}"
+                  }
+
+            - Name: Invoke-Codebuild-autocompleteOptionsget
+              InputArtifacts:
+                - Name: GitArtifacts
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: '1'
+                Provider: CodeBuild
+              RoleArn: !Sub "arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role"
+              Configuration:
+                ProjectName: !Sub arn:aws:codebuild:${AWS::Region}:${DevelopmentAccount}:project/Codebuild-${autocompleteOptionsget}-zip-upload
+              RunOrder: 32
+
+        - Name: create-lambda-autocompleteOptions-get-targetaccount
+          Actions:
+            - Name: RunCFonTargetAccount
+              RunOrder: 33
+              InputArtifacts:
+                - Name: SourceArtifacts
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              RoleArn: !Sub 'arn:aws:iam::${DevelopmentAccount}:role/CICD-Deployment-Role'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !Sub >-
+                  arn:aws:iam::${DevelopmentAccount}:role/CICD-Cloudformation-Role
+                Capabilities: CAPABILITY_NAMED_IAM
+                StackName:  !Sub StackCFT-Create-Lambda-For-${autocompleteOptionsget}-prod
+                TemplatePath: SourceArtifacts::service-lambda-autocompleteOptionsget.yaml
+                TemplateConfiguration: !Sub SourceArtifacts::params-${Env}-lambda-autocompleteOptionsget.json
+
+
+Outputs:
+  PipelineUrl:
+    Value: !Sub >-
+      https://console.aws.amazon.com/codepipeline/home?region=${AWS::Region}#/view/${Pipeline}

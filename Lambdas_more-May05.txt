@@ -1,0 +1,43 @@
+1.create-lambda-DataFilesLocation-get    Endpoint_DataFilesLocation_GET     EndpointDataFilesLocationGET  >>>  DataFilesLocationGET >> DataFilesLocation_GET
+  
+2.create-lambda-MetaData-get        Endpoint_MetaData_GET       EndpointMetaDataGET   >>> MetaDataGET   >>  MetaData_GET
+
+3.create-lambda-subsections-get    Endpoint_subsections_GET    EndpointsubsectionsGET   >>>  subsectionsGET  >> subsections_GET
+
+
+4.create-lambda-expectedfiles-put     endpoint_expected_files_put   endpointexpectedfilesput  >> expectedfilesput >> expected_files_put
+
+
+
+
+1.Zip-lambda-DataFilesLocation-get
+  
+2.Zip-lambda-MetaData-get
+
+3.create-lambda-subsections-get
+
+
+4.create-lambda-expectedfiles-put
+
+
+Changes
+
+1.Lambdas Service yaml copy and past
+
+2. Function name change
+
+3.Folder name change
+
+
+
+1.DataFilesLocation_get/service.zip
+2.expected_files_put/service.zip
+3.MetaData_get/service.zip
+4.subsections/service.zip
+
+
+
+\"bucket\":\"023240594080-us-east-1-ppssoteria-awssftp-dev-bucket\
+
+
+"EnvVarJson": "{\"dbhost\":\"ppspgd01.ccxntuvt9vew.us-east-1.rds.amazonaws.com\",\"dbport\":\"5432\",\"dbuser\":\"ppsroot\",\"dbpass\":\"u2qP6D4dBOrGJe8H\",\"dbname\":\"ili_inspection_ctx\",\"bucket\":\"023240594080-us-east-1-ppssoteria-awssftp-dev-bucket\"}",
